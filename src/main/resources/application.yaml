@@ -2,9 +2,24 @@
 
 indexing-settings:
   sites:
-    - url: https://www.lenta.ru
-      name: Лента.ру
-    - url: https://www.skillbox.ru
-      name: Skillbox
-    - url: https://www.playback.ru
-      name: PlayBack.Ru
+    - url: http://www.playback.ru
+      name: playback
+#    - url: https://ipfran.ru
+#      name: ipfran
+
+spring:
+  datasource:
+    username: root
+    password: qwer1234
+    url: jdbc:mysql://localhost:3306/search_engine?useSSL=false&requireSSL=false&allowPublicKeyRetrieval=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+  liquibase:
+    change-log: classpath:master.xml
+    enabled: true
