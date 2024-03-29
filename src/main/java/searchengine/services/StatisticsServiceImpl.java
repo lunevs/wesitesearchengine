@@ -4,14 +4,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import searchengine.config.SiteParameter;
 import searchengine.config.SitesList;
-import searchengine.dto.statistics.DetailedStatisticsItem;
-import searchengine.dto.statistics.StatisticsData;
-import searchengine.dto.statistics.StatisticsResponse;
-import searchengine.dto.statistics.TotalStatistics;
+import searchengine.data.dto.DetailedStatisticsItem;
+import searchengine.data.dto.StatisticsData;
+import searchengine.data.dto.StatisticsResponse;
+import searchengine.data.dto.TotalStatistics;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +20,8 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     private final Random random = new Random();
     private final SitesList sites;
-    private final WebSiteScanHandler handler;
+    private final SiteScannerService scannerService;
+    private final ExecutorService siteScannerExecutorService;
 
     @Override
     public StatisticsResponse startIndexing() {
@@ -32,9 +34,20 @@ public class StatisticsServiceImpl implements StatisticsService {
          по завершении обхода изменять статус (поле status) на INDEXED;
          если произошла ошибка и обход завершить не удалось, изменять статус на FAILED и вносить в поле last_error понятную информацию о произошедшей ошибке.
          */
+        sites.getSites().forEach(parameter -> siteScannerExecutorService.execute(() -> scannerService.start(parameter)));
 
-        handler.startIndexing();
-        return null;
+        StatisticsResponse response = new StatisticsResponse();
+        response.setResult(true);
+        return response;
+    }
+
+    @Override
+    public StatisticsResponse stopIndexing() {
+        siteScannerExecutorService.execute(scannerService::stop);
+
+        StatisticsResponse response = new StatisticsResponse();
+        response.setResult(true);
+        return response;
     }
 
     @Override

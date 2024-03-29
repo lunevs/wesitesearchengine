@@ -2,10 +2,12 @@ package searchengine.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import searchengine.model.Page;
-import searchengine.model.Site;
+import searchengine.data.dto.PageDto;
 
-import java.util.HashMap;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 
 @Configuration
@@ -16,4 +18,18 @@ public class AppConfiguration {
         return new ForkJoinPool();
     }
 
+    @Bean
+    public ExecutorService siteScannerExecutorService() {
+        return Executors.newWorkStealingPool();
+    }
+
+    @Bean
+    public ExecutorService fixedExecutorService() {
+        return Executors.newFixedThreadPool(4);
+    }
+
+    @Bean
+    public Set<PageDto> batchSetOfPages() {
+        return ConcurrentHashMap.newKeySet();
+    }
 }

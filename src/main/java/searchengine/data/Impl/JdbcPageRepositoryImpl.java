@@ -1,16 +1,18 @@
-package searchengine.repository;
+package searchengine.data.Impl;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.stereotype.Repository;
-import searchengine.dto.statistics.PageDto;
-import searchengine.model.Page;
+import searchengine.data.dto.PageDto;
+import searchengine.data.repository.JdbcPageRepository;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Repository
+@RequiredArgsConstructor
 public class JdbcPageRepositoryImpl implements JdbcPageRepository {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
@@ -19,25 +21,29 @@ public class JdbcPageRepositoryImpl implements JdbcPageRepository {
             "VALUES (:siteId, :pagePath, :responseCode, :pageContent) " +
             "ON DUPLICATE KEY UPDATE content = :pageContent";
 
-    public JdbcPageRepositoryImpl(NamedParameterJdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
+    private final static String deleteSqlStatement = "delete from page where site_id = :siteId";
+
 
     @Override
-    public void saveAll(List<Page> pages) {
+    public void saveAll(List<PageDto> pages) {
         splitByBatches(pages, 100);
     }
 
-    private void batchUpdate(List<Page> pages) {
-        List<PageDto> pageDtos = pages.stream().map(PageDto::of).toList();
-        SqlParameterSource[] params = SqlParameterSourceUtils.createBatch(pageDtos);
+    @Override
+    public void deleteAllBySiteId(int siteId) {
+        SqlParameterSource params = new MapSqlParameterSource("siteId", siteId);
+        jdbcTemplate.update(deleteSqlStatement, params);
+    }
+
+    private void batchUpdate(List<PageDto> pages) {
+        SqlParameterSource[] params = SqlParameterSourceUtils.createBatch(pages);
         jdbcTemplate.batchUpdate(insertSqlStatement, params);
     }
 
-    private void splitByBatches(List<Page> items, int batchSize) {
+    private void splitByBatches(List<PageDto> items, int batchSize) {
         int cnt = 0;
-        List<Page> batch = new ArrayList<>(batchSize);
-        for (Page item : items) {
+        List<PageDto> batch = new ArrayList<>(batchSize);
+        for (PageDto item : items) {
             if (++cnt % batchSize == 0) {
                 batchUpdate(batch);
                 batch = new ArrayList<>(batchSize);

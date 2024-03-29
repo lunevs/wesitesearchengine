@@ -1,9 +1,9 @@
-package searchengine.dto.statistics;
+package searchengine.data.dto;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import searchengine.model.Page;
+import searchengine.data.model.Page;
 
 
 @Getter
@@ -11,7 +11,6 @@ import searchengine.model.Page;
 @Accessors(chain = true)
 public class PageDto {
 
-    private int id;
     private Integer siteId;
     private String pagePath;
     private int responseCode;
@@ -19,7 +18,6 @@ public class PageDto {
 
     public static PageDto of(Page page) {
         return new PageDto()
-                .setId(page.getId())
                 .setSiteId(page.getSite().getId())
                 .setPagePath(page.getPagePath())
                 .setResponseCode(page.getResponseCode())

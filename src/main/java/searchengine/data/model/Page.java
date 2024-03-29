@@ -1,4 +1,4 @@
-package searchengine.model;
+package searchengine.data.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,4 +35,5 @@ public class Page {
 
     @Column(name = "content")
     private String pageContent;
+
 }

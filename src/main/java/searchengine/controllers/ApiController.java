@@ -4,7 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import searchengine.dto.statistics.StatisticsResponse;
+import searchengine.data.dto.StatisticsResponse;
 import searchengine.services.StatisticsService;
 
 @RestController
@@ -25,5 +25,10 @@ public class ApiController {
     @GetMapping("/startIndexing")
     public ResponseEntity<?> startIndexing() {
         return ResponseEntity.ok(statisticsService.startIndexing());
+    }
+
+    @GetMapping("/stopIndexing")
+    public ResponseEntity<?> stopIndexing() {
+        return ResponseEntity.ok(statisticsService.stopIndexing());
     }
 }

@@ -1,4 +1,4 @@
-package searchengine.model;
+package searchengine.data.model;
 
 public enum SiteStatus {
     INDEXING,
