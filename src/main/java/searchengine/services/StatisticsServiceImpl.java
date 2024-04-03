@@ -2,7 +2,7 @@ package searchengine.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import searchengine.config.SiteParameter;
+import searchengine.data.model.SiteParameters;
 import searchengine.config.SitesList;
 import searchengine.data.dto.DetailedStatisticsItem;
 import searchengine.data.dto.StatisticsData;
@@ -12,7 +12,6 @@ import searchengine.data.dto.TotalStatistics;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +20,6 @@ public class StatisticsServiceImpl implements StatisticsService {
     private final Random random = new Random();
     private final SitesList sites;
     private final SiteScannerService scannerService;
-    private final ExecutorService siteScannerExecutorService;
 
     @Override
     public StatisticsResponse startIndexing() {
@@ -34,7 +32,7 @@ public class StatisticsServiceImpl implements StatisticsService {
          по завершении обхода изменять статус (поле status) на INDEXED;
          если произошла ошибка и обход завершить не удалось, изменять статус на FAILED и вносить в поле last_error понятную информацию о произошедшей ошибке.
          */
-        sites.getSites().forEach(parameter -> siteScannerExecutorService.execute(() -> scannerService.start(parameter)));
+        scannerService.start(sites);
 
         StatisticsResponse response = new StatisticsResponse();
         response.setResult(true);
@@ -43,7 +41,7 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public StatisticsResponse stopIndexing() {
-        siteScannerExecutorService.execute(scannerService::stop);
+//        siteScannerExecutorService.execute(scannerService::stop);
 
         StatisticsResponse response = new StatisticsResponse();
         response.setResult(true);
@@ -64,12 +62,12 @@ public class StatisticsServiceImpl implements StatisticsService {
         total.setIndexing(true);
 
         List<DetailedStatisticsItem> detailed = new ArrayList<>();
-        List<SiteParameter> sitesList = sites.getSites();
+        List<SiteParameters> sitesList = sites.getSites();
         for(int i = 0; i < sitesList.size(); i++) {
-            SiteParameter siteParameter = sitesList.get(i);
+            SiteParameters siteParameters = sitesList.get(i);
             DetailedStatisticsItem item = new DetailedStatisticsItem();
-            item.setName(siteParameter.getName());
-            item.setUrl(siteParameter.getUrl());
+            item.setName(siteParameters.getName());
+            item.setUrl(siteParameters.getUrl());
             int pages = random.nextInt(1_000);
             int lemmas = pages * random.nextInt(1_000);
             item.setPages(pages);

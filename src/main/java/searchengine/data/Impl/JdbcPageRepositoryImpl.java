@@ -1,27 +1,27 @@
 package searchengine.data.Impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
-import org.springframework.stereotype.Repository;
 import searchengine.data.dto.PageDto;
 import searchengine.data.repository.JdbcPageRepository;
+import searchengine.tools.ResourceUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
+@Setter
 public class JdbcPageRepositoryImpl implements JdbcPageRepository {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
-    private final static String insertSqlStatement = "insert into page (site_id, path, code, content) " +
-            "VALUES (:siteId, :pagePath, :responseCode, :pageContent) " +
-            "ON DUPLICATE KEY UPDATE content = :pageContent";
-
-    private final static String deleteSqlStatement = "delete from page where site_id = :siteId";
+    private Resource createPage;
+    private Resource deletePage;
 
 
     @Override
@@ -32,12 +32,12 @@ public class JdbcPageRepositoryImpl implements JdbcPageRepository {
     @Override
     public void deleteAllBySiteId(int siteId) {
         SqlParameterSource params = new MapSqlParameterSource("siteId", siteId);
-        jdbcTemplate.update(deleteSqlStatement, params);
+        jdbcTemplate.update(ResourceUtils.getString(deletePage), params);
     }
 
     private void batchUpdate(List<PageDto> pages) {
         SqlParameterSource[] params = SqlParameterSourceUtils.createBatch(pages);
-        jdbcTemplate.batchUpdate(insertSqlStatement, params);
+        jdbcTemplate.batchUpdate(ResourceUtils.getString(createPage), params);
     }
 
     private void splitByBatches(List<PageDto> items, int batchSize) {
