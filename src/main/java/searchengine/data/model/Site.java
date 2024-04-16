@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.hibernate.annotations.CreationTimestamp;
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Accessors(chain = true)
+@NoArgsConstructor
 public class Site {
 
     @Id
@@ -40,4 +42,11 @@ public class Site {
 
     @Column(name = "name")
     private String siteName;
+
+
+    public Site(int id, String url, String name) {
+        this.id = id;
+        this.siteUrl = url;
+        this.siteName = name;
+    }
 }

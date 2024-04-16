@@ -1,6 +1,8 @@
 package searchengine.data.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import searchengine.data.model.Site;
 
@@ -8,6 +10,8 @@ import java.time.LocalDateTime;
 
 @Data
 @Accessors(chain = true)
+@NoArgsConstructor
+@AllArgsConstructor
 public class SiteDto {
 
     private int siteId;

@@ -1,6 +1,8 @@
 package searchengine.data.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import searchengine.data.model.Page;
@@ -9,9 +11,12 @@ import searchengine.data.model.Page;
 @Getter
 @Setter
 @Accessors(chain = true)
+@AllArgsConstructor
+@NoArgsConstructor
 public class PageDto {
 
-    private Integer siteId;
+    private int id;
+    private int siteId;
     private String pagePath;
     private int responseCode;
     private String pageContent;

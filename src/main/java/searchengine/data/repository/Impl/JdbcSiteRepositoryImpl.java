@@ -1,4 +1,4 @@
-package searchengine.data.Impl;
+package searchengine.data.repository.Impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -11,6 +11,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import searchengine.data.dto.SiteDto;
 import searchengine.data.model.Site;
 import searchengine.data.model.SiteRowMapper;
+import searchengine.data.model.SiteStatus;
 import searchengine.data.repository.JdbcSiteRepository;
 import searchengine.tools.ResourceUtils;
 
@@ -27,6 +28,13 @@ public class JdbcSiteRepositoryImpl implements JdbcSiteRepository {
     private Resource updateSiteStatus;
     private Resource createSite;
     private Resource findSiteByUrl;
+    private Resource updateAllSitesStatusTo;
+
+    @Override
+    public void updateAllSitesStatusTo(SiteStatus status) {
+        SqlParameterSource params = new MapSqlParameterSource("statusName", status.name());
+        jdbcTemplate.update(ResourceUtils.getString(updateAllSitesStatusTo), params);
+    }
 
     @Override
     public void updateSiteStatus(SiteDto siteDto) {

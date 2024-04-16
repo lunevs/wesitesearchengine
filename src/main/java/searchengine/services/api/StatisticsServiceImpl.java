@@ -1,13 +1,15 @@
-package searchengine.services;
+package searchengine.services.api;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import searchengine.data.model.SiteParameters;
 import searchengine.config.SitesList;
 import searchengine.data.dto.DetailedStatisticsItem;
 import searchengine.data.dto.StatisticsData;
 import searchengine.data.dto.StatisticsResponse;
 import searchengine.data.dto.TotalStatistics;
+import searchengine.data.model.SiteParameters;
+import searchengine.services.scanner.ExecutorServiceHandler;
+import searchengine.services.scanner.SiteScannerService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,34 +20,31 @@ import java.util.Random;
 public class StatisticsServiceImpl implements StatisticsService {
 
     private final Random random = new Random();
+
     private final SitesList sites;
     private final SiteScannerService scannerService;
+    private final ExecutorServiceHandler executorServiceHandler;
 
     @Override
     public StatisticsResponse startIndexing() {
-
-        /*
-         удалять все имеющиеся данные по этому сайту (записи из таблиц site и page);
-         создавать в таблице site новую запись со статусом INDEXING;
-         обходить все страницы, начиная с главной, добавлять их адреса, статусы и содержимое в базу данных в таблицу page;
-         в процессе обхода постоянно обновлять дату и время в поле status_time таблицы site на текущее;
-         по завершении обхода изменять статус (поле status) на INDEXED;
-         если произошла ошибка и обход завершить не удалось, изменять статус на FAILED и вносить в поле last_error понятную информацию о произошедшей ошибке.
-         */
-        scannerService.start(sites);
-
-        StatisticsResponse response = new StatisticsResponse();
-        response.setResult(true);
-        return response;
+        if (executorServiceHandler.isActive()) {
+            // TODO already run
+            return new StatisticsResponse(false, null);
+        } else {
+            scannerService.start(sites);
+            return new StatisticsResponse(true, null);
+        }
     }
 
     @Override
     public StatisticsResponse stopIndexing() {
-//        siteScannerExecutorService.execute(scannerService::stop);
-
-        StatisticsResponse response = new StatisticsResponse();
-        response.setResult(true);
-        return response;
+        if (executorServiceHandler.isActive()) {
+            scannerService.unexpectedStop();
+            return new StatisticsResponse(true, null);
+        } else {
+            // TODO already stopped
+            return new StatisticsResponse(false, null);
+        }
     }
 
     @Override
