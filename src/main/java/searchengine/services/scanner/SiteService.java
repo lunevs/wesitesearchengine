@@ -12,6 +12,7 @@ import searchengine.services.search.LemmaFinderService;
 import searchengine.services.search.SearchIndexService;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,10 +26,10 @@ public class SiteService {
 
     public int prepareSiteToStartScanning(SiteParameters parameters) {
         int siteId = getSiteByUrlOrCreate(parameters.getUrl(), parameters.getName());
-        updateSiteStatus(siteId, SiteStatus.INDEXING, null);
         searchIndexService.deleteAllBySite(siteId);
         lemmaService.deleteAllLemmasForSite(siteId);
         pageService.deleteAll(siteId);
+        updateSiteStatus(siteId, SiteStatus.INDEXING, null);
         return siteId;
     }
 
@@ -51,11 +52,8 @@ public class SiteService {
     }
 
     public int getSiteByUrlOrCreate(String siteUrl, String siteName) {
-        Site savedSite = jdbcSiteRepository.findSiteByUrl(siteUrl);
-        if (savedSite == null) {
-            return createNewSite(siteUrl, siteName).getId();
-        }
-        return savedSite.getId();
+        Optional<Site> savedSite = jdbcSiteRepository.findSiteByUrl(siteUrl);
+        return savedSite.map(Site::getId).orElseGet(() -> createNewSite(siteUrl, siteName).getId());
     }
 
     private Site createNewSite(String siteUrl, String siteName) {

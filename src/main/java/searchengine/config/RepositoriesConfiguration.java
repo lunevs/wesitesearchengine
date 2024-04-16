@@ -33,9 +33,19 @@ public class RepositoriesConfiguration {
     }
 
     @Bean
+    public SimpleJdbcInsert siteSimpleJdbcInsert(JdbcTemplate jdbcTemplate) {
+        SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("site")
+                .usingColumns("name", "url", "status", "last_error")
+                .usingGeneratedKeyColumns("id");
+        insert.compile();
+        return insert;
+    }
+
+    @Bean
     @ConfigurationProperties("sql.site")
-    public JdbcSiteRepository jdbcSiteRepository(NamedParameterJdbcTemplate jdbcTemplate) {
-        return new JdbcSiteRepositoryImpl(jdbcTemplate);
+    public JdbcSiteRepository jdbcSiteRepository(NamedParameterJdbcTemplate jdbcTemplate, SimpleJdbcInsert siteSimpleJdbcInsert) {
+        return new JdbcSiteRepositoryImpl(jdbcTemplate, siteSimpleJdbcInsert);
     }
 
     @Bean

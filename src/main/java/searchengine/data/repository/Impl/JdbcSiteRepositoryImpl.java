@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import searchengine.data.dto.SiteDto;
 import searchengine.data.model.Site;
@@ -16,7 +17,9 @@ import searchengine.data.repository.JdbcSiteRepository;
 import searchengine.tools.ResourceUtils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 
 @RequiredArgsConstructor
@@ -24,9 +27,9 @@ import java.util.Map;
 public class JdbcSiteRepositoryImpl implements JdbcSiteRepository {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
+    private final SimpleJdbcInsert siteSimpleJdbcInsert;
 
     private Resource updateSiteStatus;
-    private Resource createSite;
     private Resource findSiteByUrl;
     private Resource updateAllSitesStatusTo;
 
@@ -44,22 +47,21 @@ public class JdbcSiteRepositoryImpl implements JdbcSiteRepository {
 
     @Override
     public int save(String url, String name) {
-        GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
-        Map<String, Object> params = new HashMap<>();
-        params.put("siteUrl", url);
-        params.put("siteName", name);
-        jdbcTemplate.update(
-                ResourceUtils.getString(createSite),
-                new MapSqlParameterSource(params),
-                keyHolder);
-        return keyHolder.getKey().intValue();
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("url", url);
+        params.put("name", name);
+        params.put("status", SiteStatus.INDEXING.name());
+        params.put("last_error", "");
+        return siteSimpleJdbcInsert.executeAndReturnKey(params).intValue();
     }
 
     @Override
-    public Site findSiteByUrl(String url) {
-        return jdbcTemplate.queryForObject(
+    public Optional<Site> findSiteByUrl(String url) {
+        List<Site> results = jdbcTemplate.query(
                 ResourceUtils.getString(findSiteByUrl),
                 new MapSqlParameterSource("siteUrl", url),
                 new SiteRowMapper());
+        return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
     }
+
 }

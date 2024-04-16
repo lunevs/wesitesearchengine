@@ -50,8 +50,4 @@ public class PageService {
     public PageDto save(PageDto pageDto) {
         return pageRepository.save(pageDto);
     }
-
-    public void saveAll(List<PageDto> pageDtoList) {
-        pageRepository.saveAll(pageDtoList);
-    }
 }
