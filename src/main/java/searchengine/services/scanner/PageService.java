@@ -11,6 +11,7 @@ import searchengine.tools.PageParser;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @AllArgsConstructor
@@ -49,5 +50,9 @@ public class PageService {
 
     public PageDto save(PageDto pageDto) {
         return pageRepository.save(pageDto);
+    }
+
+    public List<PageDto> getPagesWithAllLemmas(Set<Integer> lemmaIds) {
+        return pageRepository.getPagesWithAllLemmas(lemmaIds);
     }
 }

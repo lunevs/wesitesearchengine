@@ -9,12 +9,14 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import searchengine.data.dto.LemmaCounterDto;
 import searchengine.data.dto.PageDto;
 import searchengine.data.repository.JdbcPageRepository;
 import searchengine.tools.ResourceUtils;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 @RequiredArgsConstructor
 @Setter
@@ -25,6 +27,7 @@ public class JdbcPageRepositoryImpl implements JdbcPageRepository {
     private final SimpleJdbcInsert pageSimpleJdbcInsert;
 
     private Resource deletePage;
+    private Resource getPagesWithAllLemmas;
 
     @Override
     public PageDto save(PageDto pageDto) {
@@ -36,6 +39,21 @@ public class JdbcPageRepositoryImpl implements JdbcPageRepository {
         Number id = pageSimpleJdbcInsert.executeAndReturnKey(params);
         pageDto.setId(id.intValue());
         return pageDto;
+    }
+
+    @Override
+    public List<PageDto> getPagesWithAllLemmas(Set<Integer> lemmaIds) {
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("lemmas", lemmaIds);
+        params.put("lemmasCount", lemmaIds.size());
+        return jdbcTemplate.query(
+                ResourceUtils.getString(getPagesWithAllLemmas),
+                new MapSqlParameterSource(params),
+                (rs, rowNum) -> new PageDto()
+                        .setId(rs.getInt("id"))
+                        .setSiteId(rs.getInt("site_id"))
+                        .setPagePath(rs.getString("path"))
+                        .setPageContent(rs.getString("content")));
     }
 
     @Override

@@ -8,7 +8,7 @@ import searchengine.data.model.Site;
 import searchengine.data.model.SiteParameters;
 import searchengine.data.model.SiteStatus;
 import searchengine.data.repository.JdbcSiteRepository;
-import searchengine.services.search.LemmaFinderService;
+import searchengine.services.search.LemmaParserService;
 import searchengine.services.search.SearchIndexService;
 
 import java.time.LocalDateTime;
@@ -21,7 +21,7 @@ public class SiteService {
 
     private final JdbcSiteRepository jdbcSiteRepository;
     private final PageService pageService;
-    private final LemmaFinderService lemmaService;
+    private final LemmaParserService lemmaService;
     private final SearchIndexService searchIndexService;
 
     public int prepareSiteToStartScanning(SiteParameters parameters) {
@@ -35,19 +35,19 @@ public class SiteService {
 
     public void updateSiteStatus(int siteId, SiteStatus status, String error) {
         if (error != null && !error.isBlank()) {
-            log.error(Thread.currentThread().getName() + " page parse error: " + error);
+            log.error("{} page parse error: {}", Thread.currentThread().getName(), error);
         }
         SiteDto siteDto = new SiteDto(siteId, status.name(), LocalDateTime.now(), error);
         jdbcSiteRepository.updateSiteStatus(siteDto);
     }
 
     public void markAllSitesAsFailed() {
-        log.info(Thread.currentThread().getName() + " all sites are FAILED");
+        log.info("{} all sites are FAILED", Thread.currentThread().getName());
         jdbcSiteRepository.updateAllSitesStatusTo(SiteStatus.FAILED);
     }
 
     public void markAllSitesAsIndexed() {
-        log.info(Thread.currentThread().getName() + " all sites are INDEXED");
+        log.info("{} all sites are INDEXED", Thread.currentThread().getName());
         jdbcSiteRepository.updateAllSitesStatusTo(SiteStatus.INDEXED);
     }
 

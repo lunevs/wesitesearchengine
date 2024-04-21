@@ -26,11 +26,10 @@ public class PageParser {
     public PageParseResultDto connect() throws IOException {
         response = Jsoup.connect(taskDto.getFullUrl()).execute();
         Document doc = response.parse();
-        String pageBody = doc.body().html();
-        // TODO set page normal id
+        String pageBody = doc.html();
         return new PageParseResultDto()
                 .setResultUrls(parseNextUrls(doc.select("a[href]"), taskDto))
-                .setPage(new PageDto(0, taskDto.getSiteId(), taskDto.getPath(), response.statusCode(), pageBody));
+                .setPage(new PageDto(taskDto.getSiteId(), taskDto.getPath(), response.statusCode(), pageBody));
     }
 
     private Set<ScanTaskDto> parseNextUrls(Elements elements, ScanTaskDto taskDto) {

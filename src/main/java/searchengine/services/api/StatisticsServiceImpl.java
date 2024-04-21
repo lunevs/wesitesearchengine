@@ -4,15 +4,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import searchengine.config.SitesList;
 import searchengine.data.dto.DetailedStatisticsItem;
+import searchengine.data.dto.SearchResponse;
 import searchengine.data.dto.StatisticsData;
 import searchengine.data.dto.StatisticsResponse;
 import searchengine.data.dto.TotalStatistics;
 import searchengine.data.model.SiteParameters;
 import searchengine.services.scanner.ExecutorServiceHandler;
 import searchengine.services.scanner.SiteScannerService;
+import searchengine.services.search.SearchService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 @Service
@@ -24,6 +27,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     private final SitesList sites;
     private final SiteScannerService scannerService;
     private final ExecutorServiceHandler executorServiceHandler;
+    private final SearchService searchService;
 
     @Override
     public StatisticsResponse startIndexing() {
@@ -87,5 +91,14 @@ public class StatisticsServiceImpl implements StatisticsService {
         response.setStatistics(data);
         response.setResult(true);
         return response;
+    }
+
+    @Override
+    public SearchResponse doSearch(Map<String, String> requestParameters) {
+        String query = requestParameters.get("query");
+        String siteUrl = requestParameters.get("site");
+        Integer offset = requestParameters.get("offset") == null ? 0 : Integer.parseInt(requestParameters.get("offset"));
+        Integer limit = requestParameters.get("limit") == null ? 20 : Integer.parseInt(requestParameters.get("limit"));
+        return searchService.searchStart(query, siteUrl, offset, limit);
     }
 }

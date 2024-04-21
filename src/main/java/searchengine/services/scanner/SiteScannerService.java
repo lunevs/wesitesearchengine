@@ -10,7 +10,7 @@ import searchengine.config.SitesList;
 import searchengine.data.dto.PageParseResultDto;
 import searchengine.data.dto.ScanTaskDto;
 import searchengine.data.model.SiteStatus;
-import searchengine.services.search.LemmaFinderService;
+import searchengine.services.search.LemmaParserService;
 
 @Slf4j
 @Service
@@ -20,7 +20,7 @@ public class SiteScannerService {
     private final SiteService siteService;
     private final PageService pageService;
     private final ExecutorServiceHandler executorServiceHandler;
-    private final LemmaFinderService lemmaFinderService;
+    private final LemmaParserService lemmaParserService;
 
     public void unexpectedStop() {
         executorServiceHandler.shutdownAndStopTasks();
@@ -36,7 +36,7 @@ public class SiteScannerService {
     @Async
     public void start(SitesList sitesList) {
         sitesList.getSites().forEach(parameter -> {
-            log.info(Thread.currentThread().getName() + " start SiteScannerService for URL: " + parameter.getUrl());
+            log.info("{} start SiteScannerService for URL: {}", Thread.currentThread().getName(), parameter.getUrl());
             int siteId = siteService.prepareSiteToStartScanning(parameter);
             executorServiceHandler.getQueue().push(new ScanTaskDto(parameter.getUrl(), "/", siteId));
         });
@@ -49,19 +49,6 @@ public class SiteScannerService {
             if (taskDto != null) {
                 executorServiceHandler.get().submit(() -> call(taskDto));
             }
-
-//            System.out.printf("******************************************\n");
-//            System.out.println(Thread.currentThread().getName());
-//            System.out.printf("Main: Active Threads: %d\n", executorServiceHandler.getPool().getActiveThreadCount());
-//            System.out.printf("Main: Task Count: %d\n", executorServiceHandler.getPool().getQueuedTaskCount());
-//            System.out.printf("Main: getRunningThreadCount: %d\n", executorServiceHandler.getPool().getRunningThreadCount());
-//            System.out.printf("Main: getPoolSize: %d\n", executorServiceHandler.getPool().getPoolSize());
-//            System.out.printf("******************************************\n");
-//            try {
-//                TimeUnit.SECONDS.sleep(1);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
         }
         log.info("job is done!");
         siteService.markAllSitesAsIndexed();
@@ -70,7 +57,7 @@ public class SiteScannerService {
     private PageParseResultDto call(ScanTaskDto taskDto) {
         PageParseResultDto resultDto = pageService.parseAndSavePage(taskDto);
         String pageText = Jsoup.parseBodyFragment(resultDto.getPage().getPageContent()).text();
-        lemmaFinderService.parseAndSaveAllLemmas(pageText, taskDto.getSiteId(), resultDto.getPage().getId());
+        lemmaParserService.parseAndSaveAllLemmas(pageText, taskDto.getSiteId(), resultDto.getPage().getId());
         siteService.updateSiteStatus(taskDto.getSiteId(), SiteStatus.INDEXING, "");
         resultDto.getResultUrls().forEach(task -> executorServiceHandler.getQueue().push(task));
         return resultDto;

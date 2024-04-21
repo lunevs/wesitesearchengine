@@ -3,11 +3,13 @@ package searchengine.services.search;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.morphology.LuceneMorphology;
+import org.apache.lucene.morphology.WrongCharaterException;
 import org.springframework.stereotype.Service;
 import searchengine.data.dto.LemmaDto;
 import searchengine.data.dto.SearchIndexDto;
 import searchengine.data.repository.JdbcLemmaRepository;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -18,7 +20,7 @@ import java.util.Set;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class LemmaFinderService {
+public class LemmaParserService {
 
     private final LuceneMorphology luceneMorphology;
     private final JdbcLemmaRepository lemmaRepository;
@@ -31,20 +33,8 @@ public class LemmaFinderService {
 
     public void parseAndSaveAllLemmas(String page, int siteId, int pageId) {
         Map<String, Integer> lemmas = collectLemmas(page);
+        log.info("page: {} lemmas: {}", pageId, lemmas.keySet());
         saveLemmas(lemmas, siteId);
-
-//        List<LemmaDto> allSavedLemmas = lemmaRepository.getAllLemmasForSite(siteId);
-//        List<SearchIndexDto> searchIndexDtos = allSavedLemmas.stream()
-//                .filter(el -> lemmas.containsKey(el.getLemma()))
-//                .map(el -> new SearchIndexDto()
-//                                .setPageId(pageId)
-//                                .setLemmaId(el.getId())
-//                                .setLemmaRank(Float.valueOf(lemmas.get(el.getLemma())))
-//                        )
-//                .toList();
-//        searchIndexService.saveAll(searchIndexDtos);
-
-
         List<LemmaDto> savedLemmas = getAllByNames(lemmas.keySet(), siteId);
         List<SearchIndexDto> searchIndexDtos = savedLemmas.stream()
                 .map(el -> new SearchIndexDto()
@@ -55,6 +45,7 @@ public class LemmaFinderService {
                 .toList();
         searchIndexService.saveAll(searchIndexDtos);
         log.info(Thread.currentThread().getName() + " saved " + searchIndexDtos.size() + " lemmas for site: " + siteId);
+
     }
 
     public void deleteAllLemmasForSite(int siteId) {
@@ -91,7 +82,6 @@ public class LemmaFinderService {
             }
 
             String normalWord = normalForms.get(0);
-
             if (lemmas.containsKey(normalWord)) {
                 lemmas.put(normalWord, lemmas.get(normalWord) + 1);
             } else {
@@ -100,6 +90,37 @@ public class LemmaFinderService {
         }
         return lemmas;
     }
+
+    public Map<String, Set<String>> mapLemmasToText(String text) {
+        String[] words = arrayContainsRussianWords(text);
+        HashMap<String, Set<String>> lemmas = new HashMap<>();
+
+        for (String word : words) {
+            if (word.isBlank() || word.length() < MIN_WORD_LENGTH) {
+                continue;
+            }
+
+            List<String> wordBaseForms = luceneMorphology.getMorphInfo(word);
+            if (anyWordBaseBelongToParticle(wordBaseForms)) {
+                continue;
+            }
+
+            List<String> normalForms = luceneMorphology.getNormalForms(word);
+            if (normalForms.isEmpty()) {
+                continue;
+            }
+
+            String normalWord = normalForms.get(0);
+            Set<String> tmpSet = new HashSet<>();
+            if (lemmas.containsKey(normalWord)) {
+                tmpSet = lemmas.get(normalWord);
+            }
+            tmpSet.add(word);
+            lemmas.put(normalWord, tmpSet);
+        }
+        return lemmas;
+    }
+
 
     public void saveLemmas(Map<String, Integer> lemmas, int siteId) {
         List<LemmaDto> lemmaDtoList = lemmas.entrySet().stream()
@@ -111,16 +132,33 @@ public class LemmaFinderService {
         lemmaRepository.saveAll(lemmaDtoList);
     }
 
+    public String getNormalWordForm(String word) {
+        String russianWord = word.toLowerCase(Locale.ROOT).replaceAll("([^а-я\\s])", " ").trim();
+        if (russianWord.length() < 3) {
+            return "";
+        }
+        try {
+            List<String> normalForms = luceneMorphology.getNormalForms(russianWord);
+            return normalForms.isEmpty() ? "" : normalForms.get(0);
+        } catch (WrongCharaterException e) {
+            return "";
+        }
+   }
+
+
     /**
      * @param text текст из которого собираем все леммы
      * @return набор уникальных лемм найденных в тексте
      */
     public Set<String> getLemmaSet(String text) {
+        log.info("input string: {}", text);
         String[] textArray = arrayContainsRussianWords(text);
+        log.info("result parsed array: {}", Arrays.toString(textArray));
         Set<String> lemmaSet = new HashSet<>();
         for (String word : textArray) {
             if (!word.isEmpty() && isCorrectWordForm(word)) {
                 List<String> wordBaseForms = luceneMorphology.getMorphInfo(word);
+                log.info("word: {} - base forms: {}", word, wordBaseForms);
                 if (anyWordBaseBelongToParticle(wordBaseForms)) {
                     continue;
                 }

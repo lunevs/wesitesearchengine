@@ -21,11 +21,10 @@ public class PageDto {
     private int responseCode;
     private String pageContent;
 
-    public static PageDto of(Page page) {
-        return new PageDto()
-                .setSiteId(page.getSite().getId())
-                .setPagePath(page.getPagePath())
-                .setResponseCode(page.getResponseCode())
-                .setPageContent(page.getPageContent());
+    public PageDto(int siteId, String pagePath, int responseCode, String pageContent) {
+        this.siteId = siteId;
+        this.pagePath = pagePath;
+        this.responseCode = responseCode;
+        this.pageContent = pageContent;
     }
 }
