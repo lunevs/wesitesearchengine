@@ -2,7 +2,6 @@ package searchengine.services.search;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.lucene.morphology.LuceneMorphology;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Service;
@@ -13,6 +12,7 @@ import searchengine.data.dto.PageDto;
 import searchengine.data.dto.SearchResponse;
 import searchengine.services.scanner.PageService;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -126,7 +126,7 @@ public class SearchService {
             indexes.add(curIndexes);
             log.info("{} indexes = {}", searchElement.getKey(), curIndexes);
         }
-        List<List<Integer>> indexCombinations = new ArrayList<>();
+        List<Integer> indexCombination = new ArrayList<>();
         NavigableSet<Integer> baseSet = indexes.remove(0);
         if (baseSet != null) {
             for (Integer curIndex : baseSet) {
@@ -139,26 +139,64 @@ public class SearchService {
                     }
                     curCombination.add(closest);
                 }
-                if (indexCombinations.isEmpty()) {
-                    indexCombinations.add(curCombination);
+                if (indexCombination.isEmpty()) {
+                    indexCombination.addAll(curCombination);
                 } else {
-                    List<Integer> oldCombination = indexCombinations.get(0);
-                    int oldCombinationLen = oldCombination.stream().max(Integer::compareTo).orElse(Integer.MAX_VALUE) - oldCombination.stream().min(Integer::compareTo).orElse(0);
+                    int oldCombinationLen = indexCombination.stream().max(Integer::compareTo).orElse(Integer.MAX_VALUE) - indexCombination.stream().min(Integer::compareTo).orElse(0);
                     int newCombinationLen = curCombination.stream().max(Integer::compareTo).orElse(Integer.MAX_VALUE) - curCombination.stream().min(Integer::compareTo).orElse(0);
                     if (newCombinationLen < oldCombinationLen) {
-                        indexCombinations.remove(0);
-                        indexCombinations.add(curCombination);
+                        indexCombination = new ArrayList<>(curCombination);
                     }
                 }
             }
-            List<Integer> resultCombination = indexCombinations.get(0);
-            int minIndex = resultCombination.stream().min(Integer::compareTo).orElse(0);
-            int maxIndex = resultCombination.stream().max(Integer::compareTo).orElse(text.length());
-            int fromIndex = minIndex < 70 ? 0 : minIndex - 70;
-            int toIndex = maxIndex > text.length()-70 ? text.length() : maxIndex + 70;
-            String tmpSnippet = text.substring(fromIndex, toIndex);
-            snippet = tmpSnippet.substring(tmpSnippet.indexOf(" "), tmpSnippet.lastIndexOf(" "));
+            indexCombination = indexCombination.stream().sorted().toList();
+            List<String> snippetPieces = getStrings(text, indexCombination);
+            snippet = String.join(" ... ", snippetPieces);
+
+            for (int wordStartIndex : indexCombination) {
+                int wordEndIndex = text.indexOf(" ", wordStartIndex+1);
+                String curWordToBold = text.substring(wordStartIndex, wordEndIndex);
+                log.info("make bold word: {}", curWordToBold);
+                snippet = snippet.replace(curWordToBold, MessageFormat.format("<b>{0}</b>", curWordToBold));
+            }
         }
+
         return snippet;
     }
+
+    private List<String> getStrings(String text, List<Integer> indexCombination) {
+        List<String> snippetPieces = new ArrayList<>(indexCombination.size());
+        int startIndex = 0;
+        int endIndex = 0;
+        for (int curIndex : indexCombination) {
+            if (endIndex == 0) {
+                startIndex = shiftLeft(text, curIndex);
+                endIndex = shiftRight(text, curIndex);
+                continue;
+            }
+            if (curIndex - endIndex > 100) {
+                String curPiece = text.substring(startIndex, endIndex);
+                snippetPieces.add(curPiece);
+
+                startIndex = shiftLeft(text, curIndex);
+                endIndex = shiftRight(text, curIndex);
+            } else {
+                endIndex = shiftRight(text, curIndex);
+            }
+        }
+        String curPiece = text.substring(startIndex, endIndex);
+        snippetPieces.add(curPiece);
+        return snippetPieces;
+    }
+
+    private int shiftLeft(String text, int curIndex) {
+        int tmpIndex = text.indexOf(" ", curIndex - 50);
+        return (tmpIndex == -1 || tmpIndex > curIndex) ? curIndex : tmpIndex;
+    }
+
+    private int shiftRight(String text, int curIndex) {
+        int tmpIndex = text.indexOf(" ", curIndex + 30);
+        return (tmpIndex == -1) ? text.length() : tmpIndex;
+    }
+
 }
