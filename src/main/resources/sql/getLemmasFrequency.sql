@@ -10,4 +10,10 @@ from lemma l
     from search_index i
     group by i.lemma_id
 ) t2 on t2.lemma_id = l.id
+         join (
+    select l.site_id, count(l.id) as lemma_num
+    from lemma l
+    where l.lemma in (:lemmas)
+    group by l.site_id
+) t3 on l.site_id = t3.site_id and t3.lemma_num = :lemmasCount
 where l.lemma in (:lemmas)

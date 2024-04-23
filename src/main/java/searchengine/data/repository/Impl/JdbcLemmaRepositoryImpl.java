@@ -92,10 +92,12 @@ public class JdbcLemmaRepositoryImpl implements JdbcLemmaRepository {
 
     @Override
     public List<LemmaFrequencyDto> getLemmasFrequency(Set<String> lemmas) {
-        SqlParameterSource params = new MapSqlParameterSource("lemmas", lemmas);
+        Map<String, Object> map = new HashMap<>();
+        map.put("lemmas", lemmas);
+        map.put("lemmasCount", lemmas.size());
         return jdbcTemplate.query(
                 ResourceUtils.getString(getLemmasFrequency),
-                params,
+                new MapSqlParameterSource(map),
                 (rs, rowNum) -> new LemmaFrequencyDto()
                         .setSiteId(rs.getInt("site_id"))
                         .setLemmaId(rs.getInt("id"))

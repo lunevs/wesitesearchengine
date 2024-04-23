@@ -53,6 +53,7 @@ public class PageService {
     }
 
     public List<PageDto> getPagesWithAllLemmas(Set<Integer> lemmaIds) {
+        log.info("getPagesWithAllLemmas lemmaIds: {}", lemmaIds);
         return pageRepository.getPagesWithAllLemmas(lemmaIds);
     }
 }

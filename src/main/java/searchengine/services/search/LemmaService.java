@@ -1,6 +1,7 @@
 package searchengine.services.search;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import searchengine.data.dto.FinalSearchResultDto;
 import searchengine.data.dto.LemmaCounterDto;
@@ -13,6 +14,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class LemmaService {
 
     private final JdbcLemmaRepository lemmaRepository;
@@ -32,6 +34,8 @@ public class LemmaService {
     }
 
     public List<FinalSearchResultDto> getFinalSearchResultDto(Set<Integer> lemmasIds, Set<Integer> pagesIds) {
+        log.info("lemmasIds: {}", lemmasIds);
+        log.info("pagesIds: {}", pagesIds);
         return lemmaRepository.getFinalSearchResults(lemmasIds, pagesIds);
     }
 }

@@ -40,7 +40,9 @@ public class SearchService {
 
     public SearchResponse searchStart(String query, String siteUrl, Integer offset, Integer limit) {
         Set<String> queryWords = lemmaParserService.collectLemmas(query).keySet();
+        log.info("queryWords: {}", queryWords);
         List<LemmaFrequencyDto> searchLemmas = lemmaService.getLemmasFrequency(queryWords);
+        searchLemmas.forEach(el -> log.info("LemmaFrequencyDto: {} {} {}", el.getLemmaId(), el.getLemmaName(), el.getSiteId()));
         List<LemmaFrequencyDto> filteredLemmas = searchLemmas.stream()
                 .filter(el -> el.getLemmaFrequency() < EXCLUDE_LIMIT)
                 .sorted(Comparator.comparing(LemmaFrequencyDto::getLemmaFrequency))
@@ -60,15 +62,6 @@ public class SearchService {
                 !detailedSearchItemList.isEmpty(),
                 detailedSearchItemList.size(),
                 detailedSearchItemList);
-
-//                    .forEach(el -> {
-//                        Document doc = Jsoup.parse(el.getPageContent());
-//                        String text = doc.body().text().toLowerCase();
-//                        String snippet = getSnippet(text, queryWords.stream().toList());
-//                        DetailedSearchItem item = new DetailedSearchItem(el.getSiteUrl(), el.getSiteName(), el.getPagePath(), doc.title(), snippet, el.getRelFrequency());
-//                        detailedSearchItemList.add(item);
-//                    });
-
     }
 
     private DetailedSearchItem formatDetailedSearchItem(FinalSearchResultDto searchResultDto, Set<String> queryWords) {

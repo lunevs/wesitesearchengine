@@ -4,8 +4,8 @@ indexing-settings:
   sites:
     - url: http://www.playback.ru
       name: playback
-#    - url: https://ipfran.ru
-#      name: ipfran
+    - url: https://ipfran.ru
+      name: ipfran
 
 spring:
   datasource:
