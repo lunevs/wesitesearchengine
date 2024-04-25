@@ -12,6 +12,7 @@ import searchengine.tools.PageParser;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -52,8 +53,9 @@ public class PageService {
         return pageRepository.save(pageDto);
     }
 
-    public List<PageDto> getPagesWithAllLemmas(Set<Integer> lemmaIds) {
+    public Set<Integer> getPagesWithAllLemmas(Set<Integer> lemmaIds) {
         log.info("getPagesWithAllLemmas lemmaIds: {}", lemmaIds);
-        return pageRepository.getPagesWithAllLemmas(lemmaIds);
+        List<PageDto> resultPages = pageRepository.getPagesWithAllLemmas(lemmaIds);
+        return resultPages.stream().map(PageDto::getId).collect(Collectors.toSet());
     }
 }

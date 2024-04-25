@@ -13,4 +13,12 @@ public class SearchResponse {
     private boolean result;
     private int count;
     private List<DetailedSearchItem> data;
+
+    public static SearchResponse emptyResponse() {
+        return new SearchResponse(false, 0, null);
+    }
+
+    public static SearchResponse of(List<DetailedSearchItem> detailedSearchResults) {
+        return new SearchResponse(!detailedSearchResults.isEmpty(), detailedSearchResults.size(), detailedSearchResults);
+    }
 }

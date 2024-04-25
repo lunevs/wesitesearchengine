@@ -7,21 +7,20 @@ import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Service;
 import searchengine.data.dto.DetailedSearchItem;
 import searchengine.data.dto.FinalSearchResultDto;
-import searchengine.data.dto.LemmaFrequencyDto;
-import searchengine.data.dto.PageDto;
 import searchengine.data.dto.SearchResponse;
 import searchengine.services.scanner.PageService;
 import searchengine.tools.StringUtils;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -32,69 +31,59 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SearchService {
 
-    private static final float EXCLUDE_LIMIT = 0.9F;
 
     private final LemmaParserService lemmaParserService;
     private final LemmaService lemmaService;
     private final PageService pageService;
+    private final QueryHelper queryHelper;
+    private final SearchResultHelper searchResultHelper;
+
 
     public SearchResponse searchStart(String query, String siteUrl, Integer offset, Integer limit) {
-        Set<String> queryWords = lemmaParserService.collectLemmas(query).keySet();
-        log.info("queryWords: {}", queryWords);
-        List<LemmaFrequencyDto> searchLemmas = lemmaService.getLemmasFrequency(queryWords);
-        searchLemmas.forEach(el -> log.info("LemmaFrequencyDto: {} {} {}", el.getLemmaId(), el.getLemmaName(), el.getSiteId()));
-        List<LemmaFrequencyDto> filteredLemmas = searchLemmas.stream()
-                .filter(el -> el.getLemmaFrequency() < EXCLUDE_LIMIT)
-                .sorted(Comparator.comparing(LemmaFrequencyDto::getLemmaFrequency))
-                .toList();
-        Set<Integer> filteredLemmaIds = filteredLemmas.stream().map(LemmaFrequencyDto::getLemmaId).collect(Collectors.toSet());
-
-        if (filteredLemmaIds.isEmpty()) {
-            return new SearchResponse(false, 0, null);
+        queryHelper.init(query);
+        searchResultHelper.init(lemmaService.getLemmasFrequency(queryHelper.getQueryLemmas()));
+        if (searchResultHelper.getSearchLemmasFrequency().isEmpty()) {
+            return SearchResponse.emptyResponse();
         }
-        List<FinalSearchResultDto> finalSearchResults = getFinalSearchResultDto(filteredLemmaIds, searchLemmas);
-        List<DetailedSearchItem> detailedSearchItemList = finalSearchResults.stream()
-                .sorted(Comparator.comparingInt(FinalSearchResultDto::getAbsFrequency).reversed())
-                .limit(20)
-                .map(el -> formatDetailedSearchItem(el,queryWords))
-                .toList();
-        return new SearchResponse(
-                !detailedSearchItemList.isEmpty(),
-                detailedSearchItemList.size(),
-                detailedSearchItemList);
+        return SearchResponse.of(processSearch(limit));
     }
 
-    private DetailedSearchItem formatDetailedSearchItem(FinalSearchResultDto searchResultDto, Set<String> queryWords) {
+    private List<DetailedSearchItem> processSearch(Integer limit) {
+        Set<Integer> pagesWithAllLemmas = pageService.getPagesWithAllLemmas(searchResultHelper.getFilterLemmasIds());
+        List<FinalSearchResultDto> searchResults = lemmaService.getFinalSearchResultDto(searchResultHelper.getAllLemmasIds(), pagesWithAllLemmas);
+        Map<String, Set<Integer>> siteFrequencies = searchResultHelper.getResultsFrequencyBySites(searchResults);
+        searchResults.forEach(el -> el.setRelFrequency(getRelFrequencyForElement(el, siteFrequencies.get(el.getSiteUrl()))));
+//        for (Map.Entry<String, Set<Integer>> entry : siteFrequencies.entrySet()) {
+//            Optional<Integer> max = siteFrequencies.get(entry.getKey()).stream().max(Float::compare);
+//            max.ifPresent(value -> searchResults.forEach(el -> el.setRelFrequency((double) el.getAbsFrequency() / value)));
+//        }
+        return prepareResults(searchResults, limit);
+    }
+
+    private List<DetailedSearchItem> prepareResults(List<FinalSearchResultDto> searchResults, Integer limit) {
+        return searchResults.stream()
+                .sorted(Comparator.comparingInt(FinalSearchResultDto::getAbsFrequency).reversed())
+                .limit(limit)
+                .map(this::createDetailedSearchItem)
+                .toList();
+    }
+
+    private DetailedSearchItem createDetailedSearchItem(FinalSearchResultDto searchResultDto) {
         Document doc = Jsoup.parse(searchResultDto.getPageContent());
         String text = doc.body().text().toLowerCase();
-        String snippet = getSnippet(text, queryWords.stream().toList());
-        return new DetailedSearchItem(searchResultDto.getSiteUrl(), searchResultDto.getSiteName(), searchResultDto.getPagePath(), doc.title(), snippet, searchResultDto.getRelFrequency());
+        String snippet = createSnippet(text, queryHelper.getQueryLemmasAsList());
+        return DetailedSearchItem.of(searchResultDto, doc.title(), snippet);
     }
 
-    private List<FinalSearchResultDto> getFinalSearchResultDto(Set<Integer> filteredLemmaIds, List<LemmaFrequencyDto> searchLemmas) {
-        List<PageDto> resultPages = pageService.getPagesWithAllLemmas(filteredLemmaIds);
-        Set<Integer> allLemmasIds = searchLemmas.stream().map(LemmaFrequencyDto::getLemmaId).collect(Collectors.toSet());
-        List<FinalSearchResultDto> result = lemmaService.getFinalSearchResultDto(
-                allLemmasIds,
-                resultPages.stream().map(PageDto::getId).collect(Collectors.toSet()));
-
-        Map<String, Set<Integer>> siteFrequencies = result.stream()
-                .collect(Collectors.groupingBy(
-                        FinalSearchResultDto::getSiteUrl,
-                        Collectors.mapping(FinalSearchResultDto::getAbsFrequency, Collectors.toSet())));
-        for (Map.Entry<String, Set<Integer>> entry : siteFrequencies.entrySet()) {
-            Optional<Integer> max = siteFrequencies.get(entry.getKey()).stream().max(Float::compare);
-            max.ifPresent(value -> result.forEach(el -> el.setRelFrequency((double) el.getAbsFrequency() / value)));
-        }
-        return result;
+    private double getRelFrequencyForElement(FinalSearchResultDto resultDto, Set<Integer> setAbsFrequencies) {
+        return (double) resultDto.getAbsFrequency() / Collections.max(setAbsFrequencies);
     }
 
-    public String getSnippet(String text, List<String> words) {
+    public String createSnippet(String text, List<String> words) {
         Map<String, Set<String>> searchFormWords = getNormalFormsMap(text, words);
         List<NavigableSet<Integer>> indexes = findWordsIndexes(text, searchFormWords);
         List<Integer> indexCombination = findClosestWordCombination(indexes);
         String snippet = StringUtils.createSnippet(text, indexCombination);
-
         return makeSearchWordsBold(indexCombination, text, snippet);
     }
 

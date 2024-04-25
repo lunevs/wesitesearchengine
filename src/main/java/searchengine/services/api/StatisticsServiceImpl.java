@@ -22,6 +22,8 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class StatisticsServiceImpl implements StatisticsService {
 
+    private static final int DEFAULT_SEARCH_LIMIT = 20;
+    private static final int DEFAULT_SEARCH_OFFSET = 0;
     private final Random random = new Random();
 
     private final SitesList sites;
@@ -97,8 +99,8 @@ public class StatisticsServiceImpl implements StatisticsService {
     public SearchResponse doSearch(Map<String, String> requestParameters) {
         String query = requestParameters.get("query");
         String siteUrl = requestParameters.get("site");
-        Integer offset = requestParameters.get("offset") == null ? 0 : Integer.parseInt(requestParameters.get("offset"));
-        Integer limit = requestParameters.get("limit") == null ? 20 : Integer.parseInt(requestParameters.get("limit"));
+        Integer offset = requestParameters.get("offset") == null ? DEFAULT_SEARCH_OFFSET : Integer.parseInt(requestParameters.get("offset"));
+        Integer limit = requestParameters.get("limit") == null ? DEFAULT_SEARCH_LIMIT : Integer.parseInt(requestParameters.get("limit"));
         return searchService.searchStart(query, siteUrl, offset, limit);
     }
 }
