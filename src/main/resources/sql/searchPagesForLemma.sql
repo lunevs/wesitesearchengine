@@ -1,4 +1,12 @@
-select i.lemma_id, l.lemma, l.site_id, s.url, i.page_id, p.path, lemma_rank, l.frequency
+select
+    i.lemma_id
+     , l.lemma as lemma_name
+     , l.site_id
+     , s.url as site_url
+     , i.page_id
+     , p.path as page_path
+     , lemma_rank as count_per_page
+     , l.frequency as count_per_site
 from search_index i
          join lemma l on i.lemma_id = l.id
          join search_engine.site s on s.id = l.site_id

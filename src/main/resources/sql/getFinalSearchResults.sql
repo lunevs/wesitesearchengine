@@ -1,4 +1,10 @@
-select t.page_id, t.abs_frequency, p.path, p.content, s.url, s.name
+select
+    t.page_id
+     , t.abs_frequency
+     , p.path as page_path
+     , p.content as page_content
+     , s.url as site_url
+     , s.name as site_name
 from (
          select i.page_id, sum(i.lemma_rank) as abs_frequency
          from search_index i

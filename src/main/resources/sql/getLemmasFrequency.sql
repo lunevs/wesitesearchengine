@@ -1,4 +1,10 @@
-select l.site_id, l.id, l.lemma, t1.total_pages, t2.total_pages_with_lemma
+select
+    l.site_id
+     , l.id as lemma_id
+     , l.lemma as lemma_name
+     , t1.total_pages as total_site_pages
+     , t2.total_pages_with_lemma
+     , t1.total_pages / t2.total_pages_with_lemma as lemma_frequency
 from lemma l
          join (
     select p.site_id, count(p.id) as total_pages
