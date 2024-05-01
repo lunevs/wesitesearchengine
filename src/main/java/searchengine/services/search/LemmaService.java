@@ -30,7 +30,9 @@ public class LemmaService {
     }
 
     public List<LemmaFrequencyDto> getLemmasFrequency(Set<String> lemmas) {
-        return lemmaRepository.getLemmasFrequency(lemmas);
+        List<LemmaFrequencyDto> res = lemmaRepository.getLemmasFrequency(lemmas);
+        log.info("LemmaFrequencyDto: {}", res);
+        return res;
     }
 
     public List<FinalSearchResultDto> getFinalSearchResultDto(Set<Integer> lemmasIds, Set<Integer> pagesIds) {

@@ -1,4 +1,4 @@
-select p.id, p.site_id, p.path, p.content
+select p.id, p.site_id, p.path as page_path, p.content as page_content
 from (
     select page_id, count(*) as cnt
     from search_index i

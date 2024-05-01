@@ -10,6 +10,8 @@ import searchengine.data.repository.JdbcPageRepository;
 import searchengine.tools.PageParser;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -55,6 +57,10 @@ public class PageService {
 
     public Set<Integer> getPagesWithAllLemmas(Set<Integer> lemmaIds) {
         log.info("getPagesWithAllLemmas lemmaIds: {}", lemmaIds);
+        if (lemmaIds.isEmpty()) {
+            // TODO will return all pages
+            return Collections.emptySet();
+        }
         List<PageDto> resultPages = pageRepository.getPagesWithAllLemmas(lemmaIds);
         return resultPages.stream().map(PageDto::getId).collect(Collectors.toSet());
     }

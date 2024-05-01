@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -16,6 +17,7 @@ import searchengine.tools.ResourceUtils;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @RequiredArgsConstructor
@@ -43,22 +45,21 @@ public class JdbcPageRepositoryImpl implements JdbcPageRepository {
 
     @Override
     public List<PageDto> getPagesWithAllLemmas(Set<Integer> lemmaIds) {
-        HashMap<String, Object> params = new HashMap<>();
-        params.put("lemmas", lemmaIds);
-        params.put("lemmasCount", lemmaIds.size());
         return jdbcTemplate.query(
                 ResourceUtils.getString(getPagesWithAllLemmas),
-                new MapSqlParameterSource(params),
-                (rs, rowNum) -> new PageDto()
-                        .setId(rs.getInt("id"))
-                        .setSiteId(rs.getInt("site_id"))
-                        .setPagePath(rs.getString("path"))
-                        .setPageContent(rs.getString("content")));
+                Map.of("lemmas", lemmaIds, "lemmasCount", lemmaIds.size()),
+                new BeanPropertyRowMapper<>(PageDto.class));
+//                (rs, rowNum) -> new PageDto()
+//                        .setId(rs.getInt("id"))
+//                        .setSiteId(rs.getInt("site_id"))
+//                        .setPagePath(rs.getString("path"))
+//                        .setPageContent(rs.getString("content")));
     }
 
     @Override
     public void deleteAllBySiteId(int siteId) {
-        SqlParameterSource params = new MapSqlParameterSource("siteId", siteId);
-        jdbcTemplate.update(ResourceUtils.getString(deletePage), params);
+        jdbcTemplate.update(
+                ResourceUtils.getString(deletePage),
+                Map.of("siteId", siteId));
     }
 }

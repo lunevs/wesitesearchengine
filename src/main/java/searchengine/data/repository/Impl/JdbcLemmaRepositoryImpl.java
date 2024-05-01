@@ -74,13 +74,7 @@ public class JdbcLemmaRepositoryImpl implements JdbcLemmaRepository {
         return jdbcTemplate.query(
                 ResourceUtils.getString(getLemmasFrequency),
                 Map.of("lemmas", lemmas, "lemmasCount", lemmas.size()),
-                (rs, rowNum) -> new LemmaFrequencyDto()
-                        .setSiteId(rs.getInt("site_id"))
-                        .setLemmaId(rs.getInt("id"))
-                        .setLemmaName(rs.getString("lemma"))
-                        .setTotalSitePages(rs.getInt("total_pages"))
-                        .setTotalPagesWithLemma(rs.getInt("total_pages_with_lemma"))
-                        .setLemmaFrequency((float) rs.getInt("total_pages_with_lemma")/rs.getInt("total_pages")));
+                new BeanPropertyRowMapper<>(LemmaFrequencyDto.class));
     }
 
     @Override
@@ -89,12 +83,5 @@ public class JdbcLemmaRepositoryImpl implements JdbcLemmaRepository {
                 ResourceUtils.getString(getFinalSearchResults),
                 Map.of("lemmasIds", lemmasIds, "pagesIds", pagesIds),
                 new BeanPropertyRowMapper<>(FinalSearchResultDto.class));
-//                (rs, rowNum) -> new FinalSearchResultDto()
-//                        .setPageId(rs.getInt("page_id"))
-//                        .setAbsFrequency(rs.getInt("abs_frequency"))
-//                        .setPagePath(rs.getString("path"))
-//                        .setPageContent(rs.getString("content"))
-//                        .setSiteUrl(rs.getString("url"))
-//                        .setSiteName(rs.getString("name")));
     }
 }

@@ -1,13 +1,11 @@
 package searchengine.services.search;
 
 import lombok.Getter;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import searchengine.data.dto.DetailedSearchItem;
 import searchengine.data.dto.FinalSearchResultDto;
 import searchengine.data.dto.LemmaFrequencyDto;
-import searchengine.data.dto.SearchResponse;
 
 import java.util.Comparator;
 import java.util.List;
@@ -17,18 +15,20 @@ import java.util.stream.Collectors;
 
 @Component
 @Getter
-public class SearchResultHelper {
+public class SearchQueryLemmasHolder {
 
     private static final float EXCLUDE_LIMIT = 0.9F;
+    private static final Logger log = LoggerFactory.getLogger(SearchQueryLemmasHolder.class);
 
-    private List<LemmaFrequencyDto> searchLemmasFrequency;
+    private List<LemmaFrequencyDto> searchLemmasList;
 
     public void init(List<LemmaFrequencyDto> searchLemmasFrequency) {
-        this.searchLemmasFrequency = searchLemmasFrequency;
+        this.searchLemmasList = searchLemmasFrequency;
+        log.info("constructed SearchQueryLemmasHolder: total lemmas {} and filtered lemmas: {} ", getAllLemmasIds().size(), getFilterLemmasIds().size());
     }
 
     public Set<Integer> getFilterLemmasIds() {
-        return searchLemmasFrequency.stream()
+        return searchLemmasList.stream()
                 .filter(el -> el.getLemmaFrequency() < EXCLUDE_LIMIT)
                 .sorted(Comparator.comparing(LemmaFrequencyDto::getLemmaFrequency))
                 .map(LemmaFrequencyDto::getLemmaId)
@@ -36,7 +36,7 @@ public class SearchResultHelper {
     }
 
     public Set<Integer> getAllLemmasIds() {
-        return searchLemmasFrequency.stream()
+        return searchLemmasList.stream()
                 .map(LemmaFrequencyDto::getLemmaId)
                 .collect(Collectors.toSet());
     }

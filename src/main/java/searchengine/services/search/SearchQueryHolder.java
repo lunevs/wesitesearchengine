@@ -12,7 +12,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Slf4j
 @Getter
-public class QueryHelper {
+public class SearchQueryHolder {
 
     private final LemmaParserService lemmaParserService;
 

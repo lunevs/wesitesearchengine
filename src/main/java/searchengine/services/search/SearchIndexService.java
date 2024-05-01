@@ -17,11 +17,11 @@ public class SearchIndexService {
 
     public void saveAll(List<SearchIndexDto> searchIndexDtoList) {
         searchIndexRepository.saveAll(searchIndexDtoList);
-        log.info(Thread.currentThread().getName() + " saved " + searchIndexDtoList.size() + " indexes");
+        log.info("{} saved {} indexes", Thread.currentThread().getName(), searchIndexDtoList.size());
     }
 
     public void deleteAllBySite(int siteId) {
-        log.info(Thread.currentThread().getName() + " delete all indexes for site: " + siteId);
+        log.info("{} delete all indexes for site: {}", Thread.currentThread().getName(), siteId);
         searchIndexRepository.deleteAllForSite(siteId);
     }
 }

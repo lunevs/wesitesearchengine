@@ -13,6 +13,7 @@ import searchengine.data.repository.JdbcSearchIndexRepository;
 import searchengine.tools.ResourceUtils;
 
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Setter
@@ -27,13 +28,12 @@ public class JdbcSearchIndexRepositoryImpl implements JdbcSearchIndexRepository 
     public void saveAll(List<SearchIndexDto> indexDtoList) {
         SqlParameterSource[] params = SqlParameterSourceUtils.createBatch(indexDtoList);
         jdbcTemplate.batchUpdate(ResourceUtils.getString(saveListSearchIndex), params);
-        log.info(Thread.currentThread().getName() + " saved batch of " + indexDtoList.size() + " SearchIndexes");
+        log.info("{} saved batch of {} SearchIndexes", Thread.currentThread().getName(), indexDtoList.size());
     }
 
     @Override
     public void deleteAllForSite(int siteId) {
         String sql = "delete s from search_index s join page p on s.page_id = p.id where p.site_id = :siteId";
-        SqlParameterSource params = new MapSqlParameterSource("siteId", siteId);
-        jdbcTemplate.update(sql, params);
+        jdbcTemplate.update(sql, Map.of("siteId", siteId));
     }
 }

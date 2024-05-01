@@ -35,14 +35,16 @@ public class JdbcSiteRepositoryImpl implements JdbcSiteRepository {
 
     @Override
     public void updateAllSitesStatusTo(SiteStatus status) {
-        SqlParameterSource params = new MapSqlParameterSource("statusName", status.name());
-        jdbcTemplate.update(ResourceUtils.getString(updateAllSitesStatusTo), params);
+        jdbcTemplate.update(
+                ResourceUtils.getString(updateAllSitesStatusTo),
+                Map.of("statusName", status.name()));
     }
 
     @Override
     public void updateSiteStatus(SiteDto siteDto) {
-        SqlParameterSource params = new BeanPropertySqlParameterSource(siteDto);
-        jdbcTemplate.update(ResourceUtils.getString(updateSiteStatus), params);
+        jdbcTemplate.update(
+                ResourceUtils.getString(updateSiteStatus),
+                new BeanPropertySqlParameterSource(siteDto));
     }
 
     @Override
