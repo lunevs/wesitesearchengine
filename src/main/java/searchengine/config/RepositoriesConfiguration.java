@@ -11,10 +11,12 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import searchengine.data.repository.Impl.JdbcLemmaRepositoryImpl;
 import searchengine.data.repository.Impl.JdbcPageRepositoryImpl;
 import searchengine.data.repository.Impl.JdbcSearchIndexRepositoryImpl;
+import searchengine.data.repository.Impl.JdbcSearchResultsRepositoryImpl;
 import searchengine.data.repository.Impl.JdbcSiteRepositoryImpl;
 import searchengine.data.repository.JdbcLemmaRepository;
 import searchengine.data.repository.JdbcPageRepository;
 import searchengine.data.repository.JdbcSearchIndexRepository;
+import searchengine.data.repository.JdbcSearchResultsRepository;
 import searchengine.data.repository.JdbcSiteRepository;
 
 @Configuration
@@ -64,5 +66,11 @@ public class RepositoriesConfiguration {
     @ConfigurationProperties("sql.lemma")
     public JdbcLemmaRepository jdbcLemmaRepository(NamedParameterJdbcTemplate jdbcTemplate) {
         return new JdbcLemmaRepositoryImpl(jdbcTemplate);
+    }
+
+    @Bean
+    @ConfigurationProperties("sql.results")
+    public JdbcSearchResultsRepository jdbcSearchResultsRepository(NamedParameterJdbcTemplate jdbcTemplate) {
+        return new JdbcSearchResultsRepositoryImpl(jdbcTemplate);
     }
 }

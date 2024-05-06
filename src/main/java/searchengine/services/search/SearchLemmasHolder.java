@@ -1,11 +1,12 @@
 package searchengine.services.search;
 
 import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import searchengine.data.dto.FinalSearchResultDto;
+import searchengine.data.dto.SearchResultsDto;
 import searchengine.data.dto.LemmaFrequencyDto;
+import searchengine.data.repository.JdbcLemmaRepository;
 
 import java.util.Comparator;
 import java.util.List;
@@ -15,15 +16,18 @@ import java.util.stream.Collectors;
 
 @Component
 @Getter
-public class SearchQueryLemmasHolder {
+@Slf4j
+@RequiredArgsConstructor
+public class SearchLemmasHolder {
+
+    private final JdbcLemmaRepository lemmaRepository;
 
     private static final float EXCLUDE_LIMIT = 0.9F;
-    private static final Logger log = LoggerFactory.getLogger(SearchQueryLemmasHolder.class);
 
     private List<LemmaFrequencyDto> searchLemmasList;
 
-    public void init(List<LemmaFrequencyDto> searchLemmasFrequency) {
-        this.searchLemmasList = searchLemmasFrequency;
+    public void init(Set<String> lemmas) {
+        this.searchLemmasList = lemmaRepository.getLemmasFrequency(lemmas);
         log.info("constructed SearchQueryLemmasHolder: total lemmas {} and filtered lemmas: {} ", getAllLemmasIds().size(), getFilterLemmasIds().size());
     }
 
@@ -41,11 +45,11 @@ public class SearchQueryLemmasHolder {
                 .collect(Collectors.toSet());
     }
 
-    public Map<String, Set<Integer>> getResultsFrequencyBySites(List<FinalSearchResultDto> searchResults) {
+    public Map<String, Set<Integer>> getResultsFrequencyBySites(List<SearchResultsDto> searchResults) {
         return searchResults.stream()
                 .collect(Collectors.groupingBy(
-                        FinalSearchResultDto::getSiteUrl,
-                        Collectors.mapping(FinalSearchResultDto::getAbsFrequency, Collectors.toSet())));
+                        SearchResultsDto::getSiteUrl,
+                        Collectors.mapping(SearchResultsDto::getAbsFrequency, Collectors.toSet())));
     }
 
 }

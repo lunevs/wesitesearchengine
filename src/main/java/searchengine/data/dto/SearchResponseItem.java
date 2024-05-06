@@ -9,7 +9,7 @@ import lombok.experimental.Accessors;
 @AllArgsConstructor
 @NoArgsConstructor
 @Accessors(chain = true)
-public class DetailedSearchItem {
+public class SearchResponseItem {
     private String site;
     private String siteName;
     private String uri;
@@ -17,13 +17,13 @@ public class DetailedSearchItem {
     private String snippet;
     private double relevance;
 
-    public static DetailedSearchItem of(FinalSearchResultDto searchResultDto, String title, String snippet) {
-        return new DetailedSearchItem()
+    public static SearchResponseItem of(SearchResultsDto searchResultDto) {
+        return new SearchResponseItem()
                 .setSite(searchResultDto.getSiteUrl())
                 .setSiteName(searchResultDto.getSiteName())
                 .setUri(searchResultDto.getPagePath())
-                .setTitle(title)
-                .setSnippet(snippet)
+                .setTitle(searchResultDto.getPageTitle())
+                .setSnippet(searchResultDto.getSnippet())
                 .setRelevance(searchResultDto.getRelFrequency());
     }
 

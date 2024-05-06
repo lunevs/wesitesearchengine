@@ -1,6 +1,6 @@
 package searchengine.data.repository;
 
-import searchengine.data.dto.FinalSearchResultDto;
+import searchengine.data.dto.SearchResultsDto;
 import searchengine.data.dto.LemmaCounterDto;
 import searchengine.data.dto.LemmaDto;
 import searchengine.data.dto.LemmaFrequencyDto;
@@ -16,5 +16,4 @@ public interface JdbcLemmaRepository {
     void deleteAllForSite(int siteId);
     List<LemmaCounterDto> searchPagesForLemma(String lemmaName);
     List<LemmaFrequencyDto> getLemmasFrequency(Set<String> lemmas);
-    List<FinalSearchResultDto> getFinalSearchResults(Set<Integer> lemmasIds, Set<Integer> pagesIds);
 }

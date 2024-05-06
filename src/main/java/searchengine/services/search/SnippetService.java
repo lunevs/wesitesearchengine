@@ -6,6 +6,7 @@ import searchengine.tools.StringUtils;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,16 +20,14 @@ import java.util.TreeSet;
 public class SnippetService {
 
     private final LemmaParserService lemmaParserService;
+    private final SearchQueryHolder searchQueryHolder;
 
     private String initialText;
-    private List<String> queryWords = new ArrayList<>();
     private final Map<String, Set<String>> textNormalFormsMap = new HashMap<>();
 
 
-    public void init(String initialText, List<String> queryWords) {
+    public void init(String initialText) {
         this.initialText = initialText;
-        this.queryWords = queryWords;
-        queryWords.forEach(w -> textNormalFormsMap.put(w, new HashSet<>()));
     }
 
     public String buildSnippet() {
@@ -41,9 +40,12 @@ public class SnippetService {
     private void fillTextWordsMap() {
         for (String curWord : initialText.split("[\\s+\\-]")) {
             String normalForm = lemmaParserService.getNormalWordForm(curWord);
-            int wordIndex;
-            if (!normalForm.isEmpty() && (wordIndex = queryWords.indexOf(normalForm)) != -1) {
-                textNormalFormsMap.get(queryWords.get(wordIndex)).add(curWord);
+            if (!normalForm.isEmpty() && searchQueryHolder.getQueryLemmasAsList().contains(normalForm)) {
+                if (textNormalFormsMap.containsKey(normalForm)) {
+                    textNormalFormsMap.get(normalForm).add(curWord);
+                } else {
+                    textNormalFormsMap.put(normalForm, new HashSet<>(List.of(curWord)));
+                }
             }
         }
     }

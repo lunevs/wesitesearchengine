@@ -28,7 +28,7 @@ public class PageService {
     }
 
     public PageParseResultDto parseAndSavePage(ScanTaskDto taskDto) {
-        log.info(Thread.currentThread().getName() + " parse page: " + taskDto.getFullUrl());
+        log.info("{} parse page: {}", Thread.currentThread().getName(), taskDto.getFullUrl());
         PageParser pageParser = new PageParser(taskDto);
         try {
             PageParseResultDto resultDto = pageParser.connect();

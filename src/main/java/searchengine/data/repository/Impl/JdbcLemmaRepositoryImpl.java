@@ -8,7 +8,7 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
-import searchengine.data.dto.FinalSearchResultDto;
+import searchengine.data.dto.SearchResultsDto;
 import searchengine.data.dto.LemmaCounterDto;
 import searchengine.data.dto.LemmaDto;
 import searchengine.data.dto.LemmaFrequencyDto;
@@ -31,7 +31,6 @@ public class JdbcLemmaRepositoryImpl implements JdbcLemmaRepository {
     private Resource getAllLemmasForSite;
     private Resource searchPagesForLemma;
     private Resource getLemmasFrequency;
-    private Resource getFinalSearchResults;
 
     @Override
     public void saveAll(List<LemmaDto> dtoList) {
@@ -77,11 +76,4 @@ public class JdbcLemmaRepositoryImpl implements JdbcLemmaRepository {
                 new BeanPropertyRowMapper<>(LemmaFrequencyDto.class));
     }
 
-    @Override
-    public List<FinalSearchResultDto> getFinalSearchResults(Set<Integer> lemmasIds, Set<Integer> pagesIds) {
-        return jdbcTemplate.query(
-                ResourceUtils.getString(getFinalSearchResults),
-                Map.of("lemmasIds", lemmasIds, "pagesIds", pagesIds),
-                new BeanPropertyRowMapper<>(FinalSearchResultDto.class));
-    }
 }

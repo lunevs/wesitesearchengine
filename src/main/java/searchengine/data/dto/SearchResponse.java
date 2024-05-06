@@ -12,13 +12,13 @@ import java.util.List;
 public class SearchResponse {
     private boolean result;
     private int count;
-    private List<DetailedSearchItem> data;
+    private List<SearchResponseItem> data;
 
     public static SearchResponse emptyResponse() {
         return new SearchResponse(false, 0, null);
     }
 
-    public static SearchResponse of(List<DetailedSearchItem> detailedSearchResults) {
+    public static SearchResponse of(List<SearchResponseItem> detailedSearchResults) {
         return new SearchResponse(!detailedSearchResults.isEmpty(), detailedSearchResults.size(), detailedSearchResults);
     }
 }
