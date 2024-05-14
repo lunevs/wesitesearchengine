@@ -2,105 +2,35 @@ package searchengine.services.api;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import searchengine.config.SitesList;
-import searchengine.data.dto.DetailedStatisticsItem;
-import searchengine.data.dto.SearchResponse;
-import searchengine.data.dto.StatisticsData;
-import searchengine.data.dto.StatisticsResponse;
-import searchengine.data.dto.TotalStatistics;
-import searchengine.data.model.SiteParameters;
-import searchengine.services.scanner.ExecutorServiceHandler;
-import searchengine.services.scanner.SiteScannerService;
-import searchengine.services.search.SearchService;
+import searchengine.data.dto.api.DetailedStatisticsItem;
+import searchengine.data.dto.api.StatisticsData;
+import searchengine.data.dto.api.StatisticsResponse;
+import searchengine.data.dto.api.TotalStatistics;
+import searchengine.data.model.Site;
+import searchengine.services.scanner.SiteService;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
 public class StatisticsServiceImpl implements StatisticsService {
 
-    private static final int DEFAULT_SEARCH_LIMIT = 20;
-    private static final int DEFAULT_SEARCH_OFFSET = 0;
-    private final Random random = new Random();
+    private final SiteService siteService;
 
-    private final SitesList sites;
-    private final SiteScannerService scannerService;
-    private final ExecutorServiceHandler executorServiceHandler;
-    private final SearchService searchService;
-
-    @Override
-    public StatisticsResponse startIndexing() {
-        if (executorServiceHandler.isActive()) {
-            // TODO already run
-            return new StatisticsResponse(false, null);
-        } else {
-            scannerService.start(sites);
-            return new StatisticsResponse(true, null);
-        }
-    }
-
-    @Override
-    public StatisticsResponse stopIndexing() {
-        if (executorServiceHandler.isActive()) {
-            scannerService.unexpectedStop();
-            return new StatisticsResponse(true, null);
-        } else {
-            // TODO already stopped
-            return new StatisticsResponse(false, null);
-        }
-    }
 
     @Override
     public StatisticsResponse getStatistics() {
-        String[] statuses = { "INDEXED", "FAILED", "INDEXING" };
-        String[] errors = {
-                "Ошибка индексации: главная страница сайта не доступна",
-                "Ошибка индексации: сайт не доступен",
-                ""
-        };
+        List<Site> siteList = siteService.findAll();
 
-        TotalStatistics total = new TotalStatistics();
-        total.setSites(sites.getSites().size());
-        total.setIndexing(true);
-
-        List<DetailedStatisticsItem> detailed = new ArrayList<>();
-        List<SiteParameters> sitesList = sites.getSites();
-        for(int i = 0; i < sitesList.size(); i++) {
-            SiteParameters siteParameters = sitesList.get(i);
-            DetailedStatisticsItem item = new DetailedStatisticsItem();
-            item.setName(siteParameters.getName());
-            item.setUrl(siteParameters.getUrl());
-            int pages = random.nextInt(1_000);
-            int lemmas = pages * random.nextInt(1_000);
-            item.setPages(pages);
-            item.setLemmas(lemmas);
-            item.setStatus(statuses[i % 3]);
-            item.setError(errors[i % 3]);
-            item.setStatusTime(System.currentTimeMillis() -
-                    (random.nextInt(10_000)));
-            total.setPages(total.getPages() + pages);
-            total.setLemmas(total.getLemmas() + lemmas);
-            detailed.add(item);
+        int totalPages = 0;
+        int totalLemmas = 0;
+        List<DetailedStatisticsItem> detailed = siteService.getDetailedStatistics();
+        for (DetailedStatisticsItem item : detailed) {
+            totalPages += item.getPages();
+            totalLemmas += item.getLemmas();
         }
-
-        StatisticsResponse response = new StatisticsResponse();
-        StatisticsData data = new StatisticsData();
-        data.setTotal(total);
-        data.setDetailed(detailed);
-        response.setStatistics(data);
-        response.setResult(true);
-        return response;
-    }
-
-    @Override
-    public SearchResponse doSearch(Map<String, String> requestParameters) {
-        String query = requestParameters.get("query");
-        String siteUrl = requestParameters.get("site");
-        Integer offset = requestParameters.get("offset") == null ? DEFAULT_SEARCH_OFFSET : Integer.parseInt(requestParameters.get("offset"));
-        Integer limit = requestParameters.get("limit") == null ? DEFAULT_SEARCH_LIMIT : Integer.parseInt(requestParameters.get("limit"));
-        return searchService.searchStart(query, siteUrl, offset, limit);
+        TotalStatistics total = TotalStatistics.of(siteList.size(), totalPages, totalLemmas, true);
+        StatisticsData data = StatisticsData.of(total, detailed);
+        return new StatisticsResponse(true, data);
     }
 }

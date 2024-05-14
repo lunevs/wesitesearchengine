@@ -1,4 +1,4 @@
-package searchengine.data.dto;
+package searchengine.data.dto.scanner;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

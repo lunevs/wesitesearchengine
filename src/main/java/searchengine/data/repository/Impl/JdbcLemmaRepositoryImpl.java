@@ -8,10 +8,9 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
-import searchengine.data.dto.SearchResultsDto;
-import searchengine.data.dto.LemmaCounterDto;
-import searchengine.data.dto.LemmaDto;
-import searchengine.data.dto.LemmaFrequencyDto;
+import searchengine.data.dto.scanner.LemmaCounterDto;
+import searchengine.data.dto.scanner.LemmaDto;
+import searchengine.data.dto.search.LemmaFrequencyDto;
 import searchengine.data.repository.JdbcLemmaRepository;
 import searchengine.tools.ResourceUtils;
 

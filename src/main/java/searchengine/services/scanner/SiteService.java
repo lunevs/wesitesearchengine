@@ -3,15 +3,16 @@ package searchengine.services.scanner;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import searchengine.data.dto.api.DetailedStatisticsItem;
 import searchengine.data.model.Site;
 import searchengine.data.model.SiteParameters;
 import searchengine.data.model.SiteStatus;
-import searchengine.data.repository.JdbcSiteRepository;
+import searchengine.data.repository.JdbcRepository;
 import searchengine.data.repository.SiteRepository;
-import searchengine.services.search.LemmaParserService;
-import searchengine.services.search.SearchIndexService;
+import searchengine.services.common.LemmaParserService;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -19,11 +20,11 @@ import java.util.Optional;
 @Slf4j
 public class SiteService {
 
-    private final JdbcSiteRepository jdbcSiteRepository;
     private final PageService pageService;
     private final LemmaParserService lemmaService;
     private final SearchIndexService searchIndexService;
     private final SiteRepository siteRepository;
+    private final JdbcRepository jdbcRepository;
 
     public int prepareSiteToStartScanning(SiteParameters parameters) {
         int siteId = getSiteByUrlOrCreate(parameters.getUrl(), parameters.getName());
@@ -34,16 +35,24 @@ public class SiteService {
         return siteId;
     }
 
-    public void updateSiteStatus(int siteId, SiteStatus status, String error) {
-        if (error != null && !error.isBlank()) {
-            log.error("{} page parse error: {}", Thread.currentThread().getName(), error);
-        }
-//        SiteDto siteDto = new SiteDto(siteId, status.name(), LocalDateTime.now(), error);
-//        jdbcSiteRepository.updateSiteStatus(siteDto);
+    public void endSiteScanning(int siteId, boolean isNotStopped) {
+        updateSiteStatus(
+                siteId,
+                isNotStopped ? SiteStatus.INDEXED : SiteStatus.FAILED,
+                isNotStopped ? "from executeScanTask" : "site scanning interrupted by user");
 
+    }
+
+    public Optional<Site> findSiteByUrl(String siteUrl) {
+        return siteRepository.findSiteBySiteUrl(siteUrl);
+    }
+
+    public void updateSiteStatus(int siteId, SiteStatus status, String error) {
+        log.info("{} call to updateSiteStatus: {} - {}", Thread.currentThread().getName(), siteId, status);
         siteRepository
                 .findById(siteId)
                 .ifPresent(site -> {
+                        log.info("{} Site found. Update status: {}", Thread.currentThread().getName(), status);
                         site
                             .setStatus(status)
                             .setLastError(error)
@@ -52,20 +61,8 @@ public class SiteService {
                 });
     }
 
-    public void markAllSitesAsFailed() {
-        log.info("{} all sites are FAILED", Thread.currentThread().getName());
-//        jdbcSiteRepository.updateAllSitesStatusTo(SiteStatus.FAILED);
-        siteRepository.updateAllSitesStatusTo(SiteStatus.FAILED.name());
-    }
-
-    public void markAllSitesAsIndexed() {
-        log.info("{} all sites are INDEXED", Thread.currentThread().getName());
-//        jdbcSiteRepository.updateAllSitesStatusTo(SiteStatus.INDEXED);
-        siteRepository.updateAllSitesStatusTo(SiteStatus.INDEXING.name());
-    }
-
     public int getSiteByUrlOrCreate(String siteUrl, String siteName) {
-        Optional<Site> savedSite = siteRepository.findSiteBySiteUrl(siteUrl); //jdbcSiteRepository.findSiteByUrl(siteUrl);
+        Optional<Site> savedSite = siteRepository.findSiteBySiteUrl(siteUrl);
         return savedSite.map(Site::getId).orElseGet(() -> createNewSite(siteUrl, siteName).getId());
     }
 
@@ -74,8 +71,13 @@ public class SiteService {
                 .setSiteUrl(siteUrl)
                 .setSiteName(siteName);
         return siteRepository.save(newSite);
+    }
 
-//        int siteId = jdbcSiteRepository.save(siteUrl, siteName);
-//        return new Site(siteId, siteUrl, siteName);
+    public List<Site> findAll() {
+        return siteRepository.findAll();
+    }
+
+    public List<DetailedStatisticsItem> getDetailedStatistics() {
+        return jdbcRepository.getDetailedSitesStatistics();
     }
 }

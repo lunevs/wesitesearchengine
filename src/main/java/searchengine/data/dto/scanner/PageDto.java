@@ -1,11 +1,10 @@
-package searchengine.data.dto;
+package searchengine.data.dto.scanner;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import searchengine.data.model.Page;
 
 
 @Getter

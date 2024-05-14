@@ -7,9 +7,9 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import searchengine.data.dto.PageDto;
-import searchengine.data.dto.PageParseResultDto;
-import searchengine.data.dto.ScanTaskDto;
+import searchengine.data.dto.scanner.PageDto;
+import searchengine.data.dto.scanner.PageParseResultDto;
+import searchengine.data.dto.scanner.ScanTaskDto;
 
 import java.io.IOException;
 import java.util.HashSet;

@@ -2,7 +2,7 @@ package searchengine.services.scanner;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import searchengine.data.dto.ScanTaskDto;
+import searchengine.data.dto.scanner.ScanTaskDto;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -15,9 +15,9 @@ public class TasksQueueService {
 
     private final Set<ScanTaskDto> tasksList = Collections.newSetFromMap(new ConcurrentHashMap<ScanTaskDto, Boolean>());
 
-    public boolean push(ScanTaskDto taskDto) {
-        log.info(Thread.currentThread().getName() + " add url to tasks list: " + taskDto.getFullUrl());
-        return tasksList.add(taskDto);
+    public void push(ScanTaskDto taskDto) {
+        log.info("{} add url to tasks list: {}", Thread.currentThread().getName(), taskDto.getFullUrl());
+        tasksList.add(taskDto);
     }
 
     public int size() {
@@ -37,5 +37,9 @@ public class TasksQueueService {
         } else {
             return null;
         }
+    }
+
+    public void deleteAllTasks() {
+        tasksList.clear();
     }
 }

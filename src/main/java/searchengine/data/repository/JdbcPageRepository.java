@@ -1,6 +1,6 @@
 package searchengine.data.repository;
 
-import searchengine.data.dto.PageDto;
+import searchengine.data.dto.scanner.PageDto;
 
 import java.util.List;
 import java.util.Set;

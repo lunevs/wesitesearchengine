@@ -5,13 +5,9 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import searchengine.data.dto.LemmaCounterDto;
-import searchengine.data.dto.PageDto;
+import searchengine.data.dto.scanner.PageDto;
 import searchengine.data.repository.JdbcPageRepository;
 import searchengine.tools.ResourceUtils;
 

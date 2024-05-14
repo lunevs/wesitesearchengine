@@ -4,11 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
-import searchengine.data.dto.SearchIndexDto;
+import searchengine.data.dto.search.SearchIndexDto;
 import searchengine.data.repository.JdbcSearchIndexRepository;
 import searchengine.tools.ResourceUtils;
 
@@ -28,7 +27,7 @@ public class JdbcSearchIndexRepositoryImpl implements JdbcSearchIndexRepository 
     public void saveAll(List<SearchIndexDto> indexDtoList) {
         SqlParameterSource[] params = SqlParameterSourceUtils.createBatch(indexDtoList);
         jdbcTemplate.batchUpdate(ResourceUtils.getString(saveListSearchIndex), params);
-        log.info("{} saved batch of {} SearchIndexes", Thread.currentThread().getName(), indexDtoList.size());
+//        log.info("{} saved batch of {} SearchIndexes", Thread.currentThread().getName(), indexDtoList.size());
     }
 
     @Override

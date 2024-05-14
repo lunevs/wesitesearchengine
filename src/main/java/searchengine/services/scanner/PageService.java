@@ -3,14 +3,13 @@ package searchengine.services.scanner;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import searchengine.data.dto.PageDto;
-import searchengine.data.dto.PageParseResultDto;
-import searchengine.data.dto.ScanTaskDto;
+import searchengine.data.dto.scanner.PageDto;
+import searchengine.data.dto.scanner.PageParseResultDto;
+import searchengine.data.dto.scanner.ScanTaskDto;
 import searchengine.data.repository.JdbcPageRepository;
 import searchengine.tools.PageParser;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;

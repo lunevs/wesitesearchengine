@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Service;
-import searchengine.data.dto.SearchResultsDto;
+import searchengine.data.dto.search.SearchResultsDto;
 import searchengine.data.repository.JdbcSearchResultsRepository;
 import searchengine.services.scanner.PageService;
 
@@ -31,20 +31,14 @@ public class SearchResultsService {
 
 
     public SearchResultsService findPages() {
-        foundPagesIds.addAll(
-                pageService.getPagesWithAllLemmas(
-                        searchLemmasHolder.getFilterLemmasIds())
-        );
+        foundPagesIds.clear();
+        foundPagesIds.addAll(pageService.getPagesWithAllLemmas(searchLemmasHolder.getFilterLemmasIds()));
         return this;
     }
 
     public SearchResultsService buildResults() {
-        log.info("lemmasIds: {}", searchLemmasHolder.getFilterLemmasIds());
-        log.info("pagesIds: {}", foundPagesIds);
-        searchResultsList.addAll(
-                searchResultsRepository.findAll(
-                        searchLemmasHolder.getFilterLemmasIds(), foundPagesIds)
-        );
+        searchResultsList.clear();
+        searchResultsList.addAll(searchResultsRepository.findAll(searchLemmasHolder.getFilterLemmasIds(), foundPagesIds));
         return this;
     }
 

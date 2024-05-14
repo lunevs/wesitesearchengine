@@ -1,4 +1,4 @@
-package searchengine.data.dto;
+package searchengine.data.dto.search;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,7 +18,7 @@ public class SearchResponse {
         return new SearchResponse(false, 0, null);
     }
 
-    public static SearchResponse of(List<SearchResponseItem> detailedSearchResults) {
-        return new SearchResponse(!detailedSearchResults.isEmpty(), detailedSearchResults.size(), detailedSearchResults);
+    public static SearchResponse of(List<SearchResponseItem> detailedSearchResults, int resultSize) {
+        return new SearchResponse(!detailedSearchResults.isEmpty(), resultSize, detailedSearchResults);
     }
 }

@@ -5,7 +5,7 @@ import lombok.Setter;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import searchengine.data.dto.SearchResultsDto;
+import searchengine.data.dto.search.SearchResultsDto;
 import searchengine.data.repository.JdbcSearchResultsRepository;
 import searchengine.tools.ResourceUtils;
 

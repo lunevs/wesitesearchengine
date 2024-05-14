@@ -1,25 +1,28 @@
 package searchengine.controllers;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import searchengine.data.dto.StatisticsResponse;
+import searchengine.data.dto.api.StatisticsResponse;
+import searchengine.services.api.IndexingService;
+import searchengine.services.api.SearchStarterService;
 import searchengine.services.api.StatisticsService;
 
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 public class ApiController {
 
     private final StatisticsService statisticsService;
+    private final IndexingService indexingService;
+    private final SearchStarterService searchStarterService;
 
-    public ApiController(StatisticsService statisticsService) {
-        this.statisticsService = statisticsService;
-    }
 
     @GetMapping("/statistics")
     public ResponseEntity<StatisticsResponse> statistics() {
@@ -28,16 +31,22 @@ public class ApiController {
 
     @GetMapping("/startIndexing")
     public ResponseEntity<?> startIndexing() {
-        return ResponseEntity.ok(statisticsService.startIndexing());
+        return ResponseEntity.ok(indexingService.startIndexing());
     }
 
     @GetMapping("/stopIndexing")
     public ResponseEntity<?> stopIndexing() {
-        return ResponseEntity.ok(statisticsService.stopIndexing());
+        return ResponseEntity.ok(indexingService.stopIndexing());
     }
 
     @GetMapping("/search")
     public ResponseEntity<?> search(@RequestParam Map<String,String> requestParameters) {
-        return ResponseEntity.ok(statisticsService.doSearch(requestParameters));
+        return ResponseEntity.ok(searchStarterService.doSearch(requestParameters));
     }
+
+    @PostMapping("/indexPage")
+    public ResponseEntity<?> indexPage(@RequestParam String url) {
+        return ResponseEntity.ok(indexingService.indexPage(url));
+    }
+
 }

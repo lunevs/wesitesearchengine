@@ -10,14 +10,14 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import searchengine.data.repository.Impl.JdbcLemmaRepositoryImpl;
 import searchengine.data.repository.Impl.JdbcPageRepositoryImpl;
+import searchengine.data.repository.Impl.JdbcRepositoryImpl;
 import searchengine.data.repository.Impl.JdbcSearchIndexRepositoryImpl;
 import searchengine.data.repository.Impl.JdbcSearchResultsRepositoryImpl;
-import searchengine.data.repository.Impl.JdbcSiteRepositoryImpl;
 import searchengine.data.repository.JdbcLemmaRepository;
 import searchengine.data.repository.JdbcPageRepository;
+import searchengine.data.repository.JdbcRepository;
 import searchengine.data.repository.JdbcSearchIndexRepository;
 import searchengine.data.repository.JdbcSearchResultsRepository;
-import searchengine.data.repository.JdbcSiteRepository;
 
 @Configuration
 @EnableConfigurationProperties
@@ -32,22 +32,6 @@ public class RepositoriesConfiguration {
                 .usingGeneratedKeyColumns("id");
         insert.compile();
         return insert;
-    }
-
-    @Bean
-    public SimpleJdbcInsert siteSimpleJdbcInsert(JdbcTemplate jdbcTemplate) {
-        SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName("site")
-                .usingColumns("name", "url", "status", "last_error")
-                .usingGeneratedKeyColumns("id");
-        insert.compile();
-        return insert;
-    }
-
-    @Bean
-    @ConfigurationProperties("sql.site")
-    public JdbcSiteRepository jdbcSiteRepository(NamedParameterJdbcTemplate jdbcTemplate, SimpleJdbcInsert siteSimpleJdbcInsert) {
-        return new JdbcSiteRepositoryImpl(jdbcTemplate, siteSimpleJdbcInsert);
     }
 
     @Bean
@@ -72,5 +56,11 @@ public class RepositoriesConfiguration {
     @ConfigurationProperties("sql.results")
     public JdbcSearchResultsRepository jdbcSearchResultsRepository(NamedParameterJdbcTemplate jdbcTemplate) {
         return new JdbcSearchResultsRepositoryImpl(jdbcTemplate);
+    }
+
+    @Bean
+    @ConfigurationProperties("sql.jdbc")
+    public JdbcRepository jdbcRepository(NamedParameterJdbcTemplate jdbcTemplate) {
+        return new JdbcRepositoryImpl(jdbcTemplate);
     }
 }

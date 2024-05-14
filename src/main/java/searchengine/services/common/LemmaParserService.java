@@ -1,17 +1,16 @@
-package searchengine.services.search;
+package searchengine.services.common;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.morphology.LuceneMorphology;
 import org.apache.lucene.morphology.WrongCharaterException;
 import org.springframework.stereotype.Service;
-import searchengine.data.dto.LemmaDto;
-import searchengine.data.dto.SearchIndexDto;
+import searchengine.data.dto.scanner.LemmaDto;
+import searchengine.data.dto.search.SearchIndexDto;
 import searchengine.data.repository.JdbcLemmaRepository;
+import searchengine.services.scanner.SearchIndexService;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -32,7 +31,7 @@ public class LemmaParserService {
 
     public void parseAndSaveAllLemmas(String page, int siteId, int pageId) {
         Map<String, Integer> lemmas = collectLemmas(page);
-        log.info("page: {} lemmas: {}", pageId, lemmas.keySet());
+//        log.info("page: {} lemmas: {}", pageId, lemmas.keySet());
         saveLemmas(lemmas, siteId);
         List<LemmaDto> savedLemmas = getAllByNames(lemmas.keySet(), siteId);
         List<SearchIndexDto> searchIndexDtos = savedLemmas.stream()
@@ -43,7 +42,7 @@ public class LemmaParserService {
                         )
                 .toList();
         searchIndexService.saveAll(searchIndexDtos);
-        log.info("{} saved {} lemmas for site: {}", Thread.currentThread().getName(), searchIndexDtos.size(), siteId);
+//        log.info("{} saved {} lemmas for site: {}", Thread.currentThread().getName(), searchIndexDtos.size(), siteId);
     }
 
     public void deleteAllLemmasForSite(int siteId) {

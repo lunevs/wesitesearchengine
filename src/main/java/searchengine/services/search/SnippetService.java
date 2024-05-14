@@ -2,11 +2,11 @@ package searchengine.services.search;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import searchengine.services.common.LemmaParserService;
 import searchengine.tools.StringUtils;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -38,6 +38,7 @@ public class SnippetService {
     }
 
     private void fillTextWordsMap() {
+        textNormalFormsMap.clear();
         for (String curWord : initialText.split("[\\s+\\-]")) {
             String normalForm = lemmaParserService.getNormalWordForm(curWord);
             if (!normalForm.isEmpty() && searchQueryHolder.getQueryLemmasAsList().contains(normalForm)) {

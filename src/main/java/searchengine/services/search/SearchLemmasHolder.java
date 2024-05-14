@@ -4,8 +4,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import searchengine.data.dto.SearchResultsDto;
-import searchengine.data.dto.LemmaFrequencyDto;
+import searchengine.data.dto.search.SearchResultsDto;
+import searchengine.data.dto.search.LemmaFrequencyDto;
 import searchengine.data.repository.JdbcLemmaRepository;
 
 import java.util.Comparator;
@@ -29,6 +29,9 @@ public class SearchLemmasHolder {
     public void init(Set<String> lemmas) {
         this.searchLemmasList = lemmaRepository.getLemmasFrequency(lemmas);
         log.info("constructed SearchQueryLemmasHolder: total lemmas {} and filtered lemmas: {} ", getAllLemmasIds().size(), getFilterLemmasIds().size());
+        if (searchLemmasList.isEmpty()) {
+            throw new IllegalArgumentException("Указанный запрос не найден");
+        }
     }
 
     public Set<Integer> getFilterLemmasIds() {

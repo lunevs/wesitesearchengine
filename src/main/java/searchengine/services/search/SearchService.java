@@ -3,9 +3,9 @@ package searchengine.services.search;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import searchengine.data.dto.SearchResponseItem;
-import searchengine.data.dto.SearchResultsDto;
-import searchengine.data.dto.SearchResponse;
+import searchengine.data.dto.search.SearchResponseItem;
+import searchengine.data.dto.search.SearchResultsDto;
+import searchengine.data.dto.search.SearchResponse;
 
 import java.util.Comparator;
 
@@ -21,28 +21,27 @@ public class SearchService {
     private final SearchLemmasHolder searchLemmasHolder;
     private final SearchResultsService searchResultsService;
 
-
-    public SearchResponse searchStart(String query, String siteUrl, Integer offset, Integer limit) {
+    public SearchResponse searchStart(String query, String siteUrl, int offset, int limit) {
         searchQueryHolder.init(query);
         searchLemmasHolder.init(searchQueryHolder.getQueryLemmas());
-        if (searchLemmasHolder.getSearchLemmasList().isEmpty()) {
-            return SearchResponse.emptyResponse();
-        }
-        return SearchResponse.of(processSearch(limit));
-    }
-
-    private List<SearchResponseItem> processSearch(Integer limit) {
         List<SearchResultsDto> searchResults = searchResultsService
                 .findPages()
                 .buildResults()
                 .enrichData()
                 .getSearchResults();
-        return prepareResults(searchResults, limit);
+        log.info("for query: {} found {} results", query, searchResults.size());
+        if (searchResults.isEmpty()) {
+            throw new IllegalArgumentException("Указанный запрос не найден");
+        }
+        return SearchResponse.of(
+                prepareResults(searchResults, limit, offset),
+                searchResults.size());
     }
 
-    private List<SearchResponseItem> prepareResults(List<SearchResultsDto> searchResults, Integer limit) {
+    private List<SearchResponseItem> prepareResults(List<SearchResultsDto> searchResults, int limit, int offset) {
         return searchResults.stream()
                 .sorted(Comparator.comparingInt(SearchResultsDto::getAbsFrequency).reversed())
+                .skip(offset)
                 .limit(limit)
                 .map(SearchResponseItem::of)
                 .toList();

@@ -1,4 +1,4 @@
-package searchengine.data.dto;
+package searchengine.data.dto.api;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
