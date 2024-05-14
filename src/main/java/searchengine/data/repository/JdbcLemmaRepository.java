@@ -11,8 +11,6 @@ public interface JdbcLemmaRepository {
 
     void saveAll(List<LemmaDto> dtoList);
     List<LemmaDto> getAllByNames(Set<String> names, int siteId);
-    List<LemmaDto> getAllLemmasForSite(int siteId);
     void deleteAllForSite(int siteId);
-    List<LemmaCounterDto> searchPagesForLemma(String lemmaName);
     List<LemmaFrequencyDto> getLemmasFrequency(Set<String> lemmas);
 }

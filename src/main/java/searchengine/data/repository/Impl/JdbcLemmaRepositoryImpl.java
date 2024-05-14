@@ -27,8 +27,6 @@ public class JdbcLemmaRepositoryImpl implements JdbcLemmaRepository {
 
     private Resource createLemma;
     private Resource getAllLemmasByNames;
-    private Resource getAllLemmasForSite;
-    private Resource searchPagesForLemma;
     private Resource getLemmasFrequency;
 
     @Override
@@ -46,25 +44,9 @@ public class JdbcLemmaRepositoryImpl implements JdbcLemmaRepository {
     }
 
     @Override
-    public List<LemmaDto> getAllLemmasForSite(int siteId) {
-        return jdbcTemplate.query(
-                ResourceUtils.getString(getAllLemmasForSite),
-                Map.of("siteId", siteId),
-                new BeanPropertyRowMapper<>(LemmaDto.class));
-    }
-
-    @Override
     public void deleteAllForSite(int siteId) {
         String sql = "delete from lemma where site_id = :siteId";
         jdbcTemplate.update(sql, Map.of("siteId", siteId));
-    }
-
-    @Override
-    public List<LemmaCounterDto> searchPagesForLemma(String lemmaName) {
-        return jdbcTemplate.query(
-                ResourceUtils.getString(searchPagesForLemma),
-                Map.of("lemmaName", lemmaName),
-                new BeanPropertyRowMapper<>(LemmaCounterDto.class));
     }
 
     @Override

@@ -45,11 +45,6 @@ public class JdbcPageRepositoryImpl implements JdbcPageRepository {
                 ResourceUtils.getString(getPagesWithAllLemmas),
                 Map.of("lemmas", lemmaIds, "lemmasCount", lemmaIds.size()),
                 new BeanPropertyRowMapper<>(PageDto.class));
-//                (rs, rowNum) -> new PageDto()
-//                        .setId(rs.getInt("id"))
-//                        .setSiteId(rs.getInt("site_id"))
-//                        .setPagePath(rs.getString("path"))
-//                        .setPageContent(rs.getString("content")));
     }
 
     @Override

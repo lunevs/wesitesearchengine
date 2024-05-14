@@ -42,20 +42,11 @@ public class PageService {
 
     }
 
-    public void save(int siteId, String path, int responseCode, String pageContent) {
-        pageRepository.save(new PageDto()
-                .setSiteId(siteId)
-                .setPagePath(path)
-                .setResponseCode(responseCode)
-                .setPageContent(pageContent));
-    }
-
     public PageDto save(PageDto pageDto) {
         return pageRepository.save(pageDto);
     }
 
     public Set<Integer> getPagesWithAllLemmas(Set<Integer> lemmaIds) {
-        log.info("getPagesWithAllLemmas lemmaIds: {}", lemmaIds);
         if (lemmaIds.isEmpty()) {
             // TODO will return all pages
             return Collections.emptySet();
