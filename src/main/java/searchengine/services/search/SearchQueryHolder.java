@@ -2,30 +2,38 @@ package searchengine.services.search;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import searchengine.data.model.Site;
 import searchengine.services.common.LemmaParserService;
+import searchengine.services.scanner.SiteService;
 
 import java.util.List;
 import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 @Getter
 public class SearchQueryHolder {
 
     private final LemmaParserService lemmaParserService;
+    private final SiteService siteService;
 
     private String initialQuery;
     private Set<String> queryLemmas;
+    private List<Integer> searchSiteIds;
 
-    public void init(String query) {
+    public void init(String query, String siteUrl) {
         initialQuery = query;
         queryLemmas = lemmaParserService.collectLemmas(query).keySet();
+        searchSiteIds = (siteUrl != null && !siteUrl.isBlank()) ?
+            List.of(siteService
+                    .findSiteByUrl(siteUrl)
+                    .orElseThrow(() -> new IllegalArgumentException("Указанный сайт не проиндексирован"))
+                    .getId())
+            : siteService.findAll().stream().map(Site::getId).toList();
     }
 
-    public List<String> getQueryLemmasAsList() {
+    public List<String> getQueryAsLemmaList() {
         return queryLemmas.stream().toList();
     }
 

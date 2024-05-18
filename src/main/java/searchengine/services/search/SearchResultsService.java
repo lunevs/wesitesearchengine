@@ -15,13 +15,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class SearchResultsService {
 
-    private final SearchLemmasHolder searchLemmasHolder;
+    private final LemmaFrequencyCalculator lemmaFrequencyCalculator;
     private final PageService pageService;
     private final SnippetService snippetService;
     private final JdbcSearchResultsRepository searchResultsRepository;
@@ -32,18 +33,18 @@ public class SearchResultsService {
 
     public SearchResultsService findPages() {
         foundPagesIds.clear();
-        foundPagesIds.addAll(pageService.getPagesWithAllLemmas(searchLemmasHolder.getFilterLemmasIds()));
+        foundPagesIds.addAll(pageService.getPagesWithAllLemmas(lemmaFrequencyCalculator.getFilterLemmasIds()));
         return this;
     }
 
     public SearchResultsService buildResults() {
         searchResultsList.clear();
-        searchResultsList.addAll(searchResultsRepository.findAll(searchLemmasHolder.getFilterLemmasIds(), foundPagesIds));
+        searchResultsList.addAll(searchResultsRepository.findAll(lemmaFrequencyCalculator.getFilterLemmasIds(), foundPagesIds));
         return this;
     }
 
     public SearchResultsService enrichData() {
-        Map<String, Set<Integer>> siteFrequencies = searchLemmasHolder.getResultsFrequencyBySites(searchResultsList);
+        Map<String, Set<Integer>> siteFrequencies = getResultsFrequencyBySites(searchResultsList);
         searchResultsList.forEach(resultsItem -> {
             Document doc = Jsoup.parse(resultsItem.getPageContent());
             String text = doc.body().text().toLowerCase();
@@ -63,6 +64,13 @@ public class SearchResultsService {
 
     private double getRelFrequencyForElement(SearchResultsDto resultDto, Set<Integer> setAbsFrequencies) {
         return (double) resultDto.getAbsFrequency() / Collections.max(setAbsFrequencies);
+    }
+
+    public Map<String, Set<Integer>> getResultsFrequencyBySites(List<SearchResultsDto> searchResults) {
+        return searchResults.stream()
+                .collect(Collectors.groupingBy(
+                        SearchResultsDto::getSiteUrl,
+                        Collectors.mapping(SearchResultsDto::getAbsFrequency, Collectors.toSet())));
     }
 
 }

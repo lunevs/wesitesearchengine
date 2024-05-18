@@ -18,12 +18,12 @@ import java.util.List;
 public class SearchService {
 
     private final SearchQueryHolder searchQueryHolder;
-    private final SearchLemmasHolder searchLemmasHolder;
+    private final LemmaFrequencyCalculator lemmaFrequencyCalculator;
     private final SearchResultsService searchResultsService;
 
     public SearchResponse searchStart(String query, String siteUrl, int offset, int limit) {
-        searchQueryHolder.init(query);
-        searchLemmasHolder.init(searchQueryHolder.getQueryLemmas());
+        searchQueryHolder.init(query, siteUrl);
+        lemmaFrequencyCalculator.calc();
         List<SearchResultsDto> searchResults = searchResultsService
                 .findPages()
                 .buildResults()

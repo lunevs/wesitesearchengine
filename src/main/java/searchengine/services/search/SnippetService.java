@@ -41,7 +41,7 @@ public class SnippetService {
         textNormalFormsMap.clear();
         for (String curWord : initialText.split("[\\s+\\-]")) {
             String normalForm = lemmaParserService.getNormalWordForm(curWord);
-            if (!normalForm.isEmpty() && searchQueryHolder.getQueryLemmasAsList().contains(normalForm)) {
+            if (!normalForm.isEmpty() && searchQueryHolder.getQueryAsLemmaList().contains(normalForm)) {
                 if (textNormalFormsMap.containsKey(normalForm)) {
                     textNormalFormsMap.get(normalForm).add(curWord);
                 } else {
