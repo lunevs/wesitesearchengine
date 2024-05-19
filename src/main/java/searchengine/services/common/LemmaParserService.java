@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.morphology.LuceneMorphology;
 import org.apache.lucene.morphology.WrongCharaterException;
 import org.springframework.stereotype.Service;
-import searchengine.data.dto.scanner.LemmaDto;
+import searchengine.data.dto.common.LemmaDto;
 import searchengine.data.dto.search.SearchIndexDto;
 import searchengine.data.repository.JdbcLemmaRepository;
 import searchengine.services.scanner.SearchIndexService;
@@ -46,11 +46,11 @@ public class LemmaParserService {
     }
 
     public void deleteAllLemmasForSite(int siteId) {
-        lemmaRepository.deleteAllForSite(siteId);
+        lemmaRepository.deleteAllBySiteId(siteId);
     }
 
     public List<LemmaDto> getAllByNames(Set<String> names, int siteId) {
-        return lemmaRepository.getAllByNames(names, siteId);
+        return lemmaRepository.findAllByNamesAndSiteId(names, siteId);
     }
 
     /**

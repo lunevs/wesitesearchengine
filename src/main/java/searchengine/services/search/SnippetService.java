@@ -7,6 +7,7 @@ import searchengine.tools.StringUtils;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -68,6 +69,9 @@ public class SnippetService {
     }
 
     private List<Integer> findClosestWordCombination(List<NavigableSet<Integer>> indexes)  {
+        if (indexes.isEmpty()) {
+            return Collections.emptyList();
+        }
         List<Integer> indexCombination = new ArrayList<>();
         NavigableSet<Integer> baseSet = indexes.remove(0);
         if (baseSet == null || baseSet.isEmpty()) {

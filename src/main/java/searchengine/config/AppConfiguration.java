@@ -29,4 +29,5 @@ public class AppConfiguration {
     public LuceneMorphology luceneMorphology() throws IOException {
         return new RussianLuceneMorphology();
     }
+
 }

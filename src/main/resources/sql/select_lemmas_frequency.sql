@@ -23,3 +23,4 @@ from lemma l
     group by l.site_id
 ) t3 on l.site_id = t3.site_id and t3.lemma_num = :lemmasCount
 where l.lemma in (:lemmas)
+    and l.site_id in (:sites)

@@ -9,12 +9,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import searchengine.data.repository.Impl.JdbcLemmaRepositoryImpl;
-import searchengine.data.repository.Impl.JdbcPageRepositoryImpl;
 import searchengine.data.repository.Impl.JdbcRepositoryImpl;
 import searchengine.data.repository.Impl.JdbcSearchIndexRepositoryImpl;
 import searchengine.data.repository.Impl.JdbcSearchResultsRepositoryImpl;
 import searchengine.data.repository.JdbcLemmaRepository;
-import searchengine.data.repository.JdbcPageRepository;
 import searchengine.data.repository.JdbcRepository;
 import searchengine.data.repository.JdbcSearchIndexRepository;
 import searchengine.data.repository.JdbcSearchResultsRepository;
@@ -32,12 +30,6 @@ public class RepositoriesConfiguration {
                 .usingGeneratedKeyColumns("id");
         insert.compile();
         return insert;
-    }
-
-    @Bean
-    @ConfigurationProperties("sql.page")
-    public JdbcPageRepository jdbcPageRepository(NamedParameterJdbcTemplate jdbcTemplate, SimpleJdbcInsert pageSimpleJdbcInsert) {
-        return new JdbcPageRepositoryImpl(jdbcTemplate, pageSimpleJdbcInsert);
     }
 
     @Bean

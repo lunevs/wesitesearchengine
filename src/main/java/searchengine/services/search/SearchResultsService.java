@@ -22,24 +22,24 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SearchResultsService {
 
-    private final LemmaFrequencyCalculator lemmaFrequencyCalculator;
+    private final LemmasHolder lemmasHolder;
     private final PageService pageService;
     private final SnippetService snippetService;
     private final JdbcSearchResultsRepository searchResultsRepository;
 
-    private final List<SearchResultsDto> searchResultsList = new ArrayList<>();
-    private final Set<Integer> foundPagesIds = new HashSet<>();
+    private List<SearchResultsDto> searchResultsList = new ArrayList<>();
+    private Set<Integer> foundPagesIds = new HashSet<>();
 
 
     public SearchResultsService findPages() {
-        foundPagesIds.clear();
-        foundPagesIds.addAll(pageService.getPagesWithAllLemmas(lemmaFrequencyCalculator.getFilterLemmasIds()));
+        foundPagesIds = pageService.findPagesWithAllLemmas(lemmasHolder.filterLemmasIds());
         return this;
     }
 
     public SearchResultsService buildResults() {
-        searchResultsList.clear();
-        searchResultsList.addAll(searchResultsRepository.findAll(lemmaFrequencyCalculator.getFilterLemmasIds(), foundPagesIds));
+        if (!foundPagesIds.isEmpty()) {
+            searchResultsList = searchResultsRepository.findAll(lemmasHolder.filterLemmasIds(), foundPagesIds);
+        }
         return this;
     }
 

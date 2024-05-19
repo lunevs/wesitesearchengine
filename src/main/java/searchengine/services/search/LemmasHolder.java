@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @Getter
 @Slf4j
 @RequiredArgsConstructor
-public class LemmaFrequencyCalculator {
+public class LemmasHolder {
 
     private final JdbcLemmaRepository lemmaRepository;
     private final SearchQueryHolder searchQueryHolder;
@@ -25,14 +25,14 @@ public class LemmaFrequencyCalculator {
 
     private List<LemmaFrequencyDto> searchLemmasList;
 
-    public void calc() {
-        this.searchLemmasList = lemmaRepository.getLemmasFrequency(searchQueryHolder.getQueryLemmas());
+    public void load() {
+        searchLemmasList = lemmaRepository.getLemmasFrequency(searchQueryHolder.getQueryLemmas(), searchQueryHolder.getSearchSiteIds());
         if (searchLemmasList.isEmpty()) {
             throw new IllegalArgumentException("Указанный запрос не найден");
         }
     }
 
-    public Set<Integer> getFilterLemmasIds() {
+    public Set<Integer> filterLemmasIds() {
         return searchLemmasList.stream()
                 .filter(el -> el.getLemmaFrequency() < EXCLUDE_LIMIT)
                 .sorted(Comparator.comparing(LemmaFrequencyDto::getLemmaFrequency))

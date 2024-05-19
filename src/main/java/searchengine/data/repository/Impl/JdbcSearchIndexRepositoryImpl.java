@@ -16,23 +16,22 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @Setter
-@Slf4j
 public class JdbcSearchIndexRepositoryImpl implements JdbcSearchIndexRepository {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
     private Resource saveListSearchIndex;
+    private Resource deleteSearchIndexBySite;
 
     @Override
     public void saveAll(List<SearchIndexDto> indexDtoList) {
         SqlParameterSource[] params = SqlParameterSourceUtils.createBatch(indexDtoList);
         jdbcTemplate.batchUpdate(ResourceUtils.getString(saveListSearchIndex), params);
-//        log.info("{} saved batch of {} SearchIndexes", Thread.currentThread().getName(), indexDtoList.size());
     }
 
     @Override
     public void deleteAllForSite(int siteId) {
-        String sql = "delete s from search_index s join page p on s.page_id = p.id where p.site_id = :siteId";
+        String sql = ResourceUtils.getString(deleteSearchIndexBySite);
         jdbcTemplate.update(sql, Map.of("siteId", siteId));
     }
 }

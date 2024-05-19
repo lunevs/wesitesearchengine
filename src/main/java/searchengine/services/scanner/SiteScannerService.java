@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import searchengine.config.SitesList;
-import searchengine.data.dto.scanner.PageDto;
+import searchengine.data.dto.common.PageDto;
 import searchengine.data.dto.scanner.PageParseResultDto;
 import searchengine.data.dto.scanner.ScanTaskDto;
 import searchengine.data.model.SiteParameters;
@@ -77,7 +77,7 @@ public class SiteScannerService {
 
     private PageParseResultDto call(ScanTaskDto taskDto) {
         if (executorServiceHandler.isNotStopped()) {
-            PageParseResultDto resultDto = pageService.parseAndSavePage(taskDto);
+            PageParseResultDto resultDto = pageService.scanPage(taskDto);
             String pageText = Jsoup.parseBodyFragment(resultDto.getPage().getPageContent()).text();
             lemmaParserService.parseAndSaveAllLemmas(pageText, taskDto.getSiteId(), resultDto.getPage().getId());
             resultDto.getResultUrls().forEach(executorServiceHandler::pushTask);

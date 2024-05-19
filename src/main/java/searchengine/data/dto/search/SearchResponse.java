@@ -14,10 +14,6 @@ public class SearchResponse {
     private int count;
     private List<SearchResponseItem> data;
 
-    public static SearchResponse emptyResponse() {
-        return new SearchResponse(false, 0, null);
-    }
-
     public static SearchResponse of(List<SearchResponseItem> detailedSearchResults, int resultSize) {
         return new SearchResponse(!detailedSearchResults.isEmpty(), resultSize, detailedSearchResults);
     }

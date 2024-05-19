@@ -1,6 +1,6 @@
 <configuration>
 
-    <property name="LOG_DIR" value="/Users/smlunev/Documents/DevTest/wesitesearchengine/src/main/logs" />
+    <property name="LOG_DIR" value="src/main/logs" />
     <property name="LOG_FILE" value="WebSiteSearchEngine" />
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_DIR}/${LOG_FILE}.log</file>

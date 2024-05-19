@@ -8,8 +8,7 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
-import searchengine.data.dto.scanner.LemmaCounterDto;
-import searchengine.data.dto.scanner.LemmaDto;
+import searchengine.data.dto.common.LemmaDto;
 import searchengine.data.dto.search.LemmaFrequencyDto;
 import searchengine.data.repository.JdbcLemmaRepository;
 import searchengine.tools.ResourceUtils;
@@ -36,7 +35,7 @@ public class JdbcLemmaRepositoryImpl implements JdbcLemmaRepository {
     }
 
     @Override
-    public List<LemmaDto> getAllByNames(Set<String> names, int siteId) {
+    public List<LemmaDto> findAllByNamesAndSiteId(Set<String> names, int siteId) {
         return jdbcTemplate.query(
                 ResourceUtils.getString(getAllLemmasByNames),
                 Map.of("names", names, "siteId", siteId),
@@ -44,16 +43,16 @@ public class JdbcLemmaRepositoryImpl implements JdbcLemmaRepository {
     }
 
     @Override
-    public void deleteAllForSite(int siteId) {
+    public void deleteAllBySiteId(int siteId) {
         String sql = "delete from lemma where site_id = :siteId";
         jdbcTemplate.update(sql, Map.of("siteId", siteId));
     }
 
     @Override
-    public List<LemmaFrequencyDto> getLemmasFrequency(Set<String> lemmas) {
+    public List<LemmaFrequencyDto> getLemmasFrequency(Set<String> lemmas, List<Integer> sitesIds) {
         return jdbcTemplate.query(
                 ResourceUtils.getString(getLemmasFrequency),
-                Map.of("lemmas", lemmas, "lemmasCount", lemmas.size()),
+                Map.of("lemmas", lemmas, "lemmasCount", lemmas.size(), "sites", sitesIds),
                 new BeanPropertyRowMapper<>(LemmaFrequencyDto.class));
     }
 
