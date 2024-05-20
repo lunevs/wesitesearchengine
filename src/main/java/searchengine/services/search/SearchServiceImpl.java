@@ -19,6 +19,7 @@ public class SearchServiceImpl implements SearchService {
 
     @Override
     public SearchResponse searchStart(String query, String siteUrl, int offset, int limit) {
+        log.info("запросу на поиск строки: {} на сайте: {}", query, siteUrl);
         searchQueryHolder.init(query, siteUrl);
         lemmasHolder.load();
         searchResultsService.findPages();
