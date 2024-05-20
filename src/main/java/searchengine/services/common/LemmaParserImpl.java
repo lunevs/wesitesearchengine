@@ -1,56 +1,32 @@
 package searchengine.services.common;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.morphology.LuceneMorphology;
 import org.apache.lucene.morphology.WrongCharaterException;
-import org.springframework.stereotype.Service;
 import searchengine.data.dto.common.LemmaDto;
-import searchengine.data.dto.search.SearchIndexDto;
-import searchengine.data.repository.JdbcLemmaRepository;
 import searchengine.services.scanner.SearchIndexService;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
-@Service
-@Slf4j
 @RequiredArgsConstructor
-public class LemmaParserService {
+public class LemmaParserImpl implements LemmaParser {
 
     private final LuceneMorphology luceneMorphology;
-    private final JdbcLemmaRepository lemmaRepository;
     private final SearchIndexService searchIndexService;
+    private final LemmaService lemmaService;
 
     private static final String[] particlesNames = new String[]{"МЕЖД", "ПРЕДЛ", "СОЮЗ"};
 
     private static final int MIN_WORD_LENGTH = 3;
 
-    public void parseAndSaveAllLemmas(String page, int siteId, int pageId) {
-        Map<String, Integer> lemmas = collectLemmas(page);
-//        log.info("page: {} lemmas: {}", pageId, lemmas.keySet());
-        saveLemmas(lemmas, siteId);
-        List<LemmaDto> savedLemmas = getAllByNames(lemmas.keySet(), siteId);
-        List<SearchIndexDto> searchIndexDtos = savedLemmas.stream()
-                .map(el -> new SearchIndexDto()
-                                .setPageId(pageId)
-                                .setLemmaId(el.getId())
-                                .setLemmaRank(Float.valueOf(lemmas.get(el.getLemma())))
-                        )
-                .toList();
-        searchIndexService.saveAll(searchIndexDtos);
-//        log.info("{} saved {} lemmas for site: {}", Thread.currentThread().getName(), searchIndexDtos.size(), siteId);
-    }
-
-    public void deleteAllLemmasForSite(int siteId) {
-        lemmaRepository.deleteAllBySiteId(siteId);
-    }
-
-    public List<LemmaDto> getAllByNames(Set<String> names, int siteId) {
-        return lemmaRepository.findAllByNamesAndSiteId(names, siteId);
+    public void parseLemmasFromPage(String pageBodyText, int siteId, int pageId) {
+        Map<String, Integer> lemmas = collectLemmas(pageBodyText);
+        lemmaService.saveLemmas(lemmas, siteId);
+        List<LemmaDto> savedLemmas = lemmaService.getAllByNames(lemmas.keySet(), siteId);
+        searchIndexService.saveAll(savedLemmas, pageId, lemmas);
     }
 
     /**
@@ -86,16 +62,6 @@ public class LemmaParserService {
             }
         }
         return lemmas;
-    }
-
-    public void saveLemmas(Map<String, Integer> lemmas, int siteId) {
-        List<LemmaDto> lemmaDtoList = lemmas.entrySet().stream()
-                .map(el -> new LemmaDto()
-                        .setLemma(el.getKey())
-                        .setFrequency(el.getValue())
-                        .setSiteId(siteId))
-                .toList();
-        lemmaRepository.saveAll(lemmaDtoList);
     }
 
     public String getNormalWordForm(String word) {

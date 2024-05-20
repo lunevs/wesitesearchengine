@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import searchengine.data.model.Site;
-import searchengine.services.common.LemmaParserService;
+import searchengine.services.common.LemmaParser;
 import searchengine.services.scanner.SiteService;
 
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.Set;
 @Getter
 public class SearchQueryHolder {
 
-    private final LemmaParserService lemmaParserService;
+    private final LemmaParser lemmaParser;
     private final SiteService siteService;
 
     private String initialQuery;
@@ -24,7 +24,7 @@ public class SearchQueryHolder {
 
     public void init(String query, String siteUrl) {
         initialQuery = query;
-        queryLemmas = lemmaParserService.collectLemmas(query).keySet();
+        queryLemmas = lemmaParser.collectLemmas(query).keySet();
         searchSiteIds = (siteUrl != null && !siteUrl.isBlank()) ?
             List.of(siteService
                     .findSiteByUrl(siteUrl)

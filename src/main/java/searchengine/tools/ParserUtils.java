@@ -17,7 +17,7 @@ import java.util.Set;
 
 @Getter
 @RequiredArgsConstructor
-public class PageParser {
+public class ParserUtils {
 
     private final ScanTaskDto taskDto;
 

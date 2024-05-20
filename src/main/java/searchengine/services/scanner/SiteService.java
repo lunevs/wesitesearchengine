@@ -3,13 +3,11 @@ package searchengine.services.scanner;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import searchengine.data.dto.api.DetailedStatisticsItem;
 import searchengine.data.model.Site;
 import searchengine.data.model.SiteParameters;
 import searchengine.data.model.SiteStatus;
-import searchengine.data.repository.JdbcRepository;
 import searchengine.data.repository.SiteRepository;
-import searchengine.services.common.LemmaParserService;
+import searchengine.services.common.LemmaService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,16 +19,15 @@ import java.util.Optional;
 public class SiteService {
 
     private final PageService pageService;
-    private final LemmaParserService lemmaService;
     private final SearchIndexService searchIndexService;
     private final SiteRepository siteRepository;
-    private final JdbcRepository jdbcRepository;
+    private final LemmaService lemmaService;
 
     public int prepareSiteToStartScanning(SiteParameters parameters) {
         int siteId = getSiteByUrlOrCreate(parameters.getUrl(), parameters.getName());
         searchIndexService.deleteAllBySite(siteId);
         lemmaService.deleteAllLemmasForSite(siteId);
-        pageService.deleteAll(siteId);
+        pageService.deleteAllPagesBySiteId(siteId);
         updateSiteStatus(siteId, SiteStatus.INDEXING, null);
         return siteId;
     }
@@ -40,7 +37,6 @@ public class SiteService {
                 siteId,
                 isNotStopped ? SiteStatus.INDEXED : SiteStatus.FAILED,
                 isNotStopped ? "from executeScanTask" : "site scanning interrupted by user");
-
     }
 
     public Optional<Site> findSiteByUrl(String siteUrl) {
@@ -75,9 +71,5 @@ public class SiteService {
 
     public List<Site> findAll() {
         return siteRepository.findAll();
-    }
-
-    public List<DetailedStatisticsItem> getDetailedStatistics() {
-        return jdbcRepository.getDetailedSitesStatistics();
     }
 }

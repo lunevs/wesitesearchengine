@@ -7,7 +7,7 @@ import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Service;
 import searchengine.data.dto.search.SearchResultsDto;
 import searchengine.data.repository.JdbcSearchResultsRepository;
-import searchengine.services.scanner.PageService;
+import searchengine.services.scanner.PageServiceImpl;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class SearchResultsService {
 
     private final LemmasHolder lemmasHolder;
-    private final PageService pageService;
+    private final PageServiceImpl pageService;
     private final SnippetService snippetService;
     private final JdbcSearchResultsRepository searchResultsRepository;
 

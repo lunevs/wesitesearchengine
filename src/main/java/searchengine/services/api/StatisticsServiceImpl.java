@@ -7,16 +7,16 @@ import searchengine.data.dto.api.StatisticsData;
 import searchengine.data.dto.api.StatisticsResponse;
 import searchengine.data.dto.api.TotalStatistics;
 import searchengine.data.model.Site;
+import searchengine.data.repository.JdbcRepository;
 import searchengine.services.scanner.SiteService;
 
 import java.util.List;
 
-@Service
 @RequiredArgsConstructor
 public class StatisticsServiceImpl implements StatisticsService {
 
     private final SiteService siteService;
-
+    private final JdbcRepository jdbcRepository;
 
     @Override
     public StatisticsResponse getStatistics() {
@@ -24,7 +24,7 @@ public class StatisticsServiceImpl implements StatisticsService {
 
         int totalPages = 0;
         int totalLemmas = 0;
-        List<DetailedStatisticsItem> detailed = siteService.getDetailedStatistics();
+        List<DetailedStatisticsItem> detailed = jdbcRepository.getDetailedSitesStatistics();
         for (DetailedStatisticsItem item : detailed) {
             totalPages += item.getPages();
             totalLemmas += item.getLemmas();

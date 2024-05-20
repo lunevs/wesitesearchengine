@@ -2,7 +2,7 @@ package searchengine.services.search;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import searchengine.services.common.LemmaParserService;
+import searchengine.services.common.LemmaParser;
 import searchengine.tools.StringUtils;
 
 import java.text.MessageFormat;
@@ -20,7 +20,7 @@ import java.util.TreeSet;
 @RequiredArgsConstructor
 public class SnippetService {
 
-    private final LemmaParserService lemmaParserService;
+    private final LemmaParser lemmaParser;
     private final SearchQueryHolder searchQueryHolder;
 
     private String initialText;
@@ -41,7 +41,7 @@ public class SnippetService {
     private void fillTextWordsMap() {
         textNormalFormsMap.clear();
         for (String curWord : initialText.split("[\\s+\\-]")) {
-            String normalForm = lemmaParserService.getNormalWordForm(curWord);
+            String normalForm = lemmaParser.getNormalWordForm(curWord);
             if (!normalForm.isEmpty() && searchQueryHolder.getQueryAsLemmaList().contains(normalForm)) {
                 if (textNormalFormsMap.containsKey(normalForm)) {
                     textNormalFormsMap.get(normalForm).add(curWord);
