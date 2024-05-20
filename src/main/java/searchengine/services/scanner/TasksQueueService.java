@@ -16,7 +16,7 @@ public class TasksQueueService {
     private final Set<ScanTaskDto> tasksList = Collections.newSetFromMap(new ConcurrentHashMap<ScanTaskDto, Boolean>());
 
     public void push(ScanTaskDto taskDto) {
-        log.info("{} add url to tasks list: {}", Thread.currentThread().getName(), taskDto.getFullUrl());
+        log.info("{} добавлено задание на сканирование адреса: {}", Thread.currentThread().getName(), taskDto.getFullUrl());
         tasksList.add(taskDto);
     }
 

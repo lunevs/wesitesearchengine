@@ -6,7 +6,7 @@ import searchengine.data.dto.scanner.ScanTaskDto;
 public interface SiteScannerService {
 
     void unexpectedStop();
-    void startAllSitesScan(SitesList sitesList);
-    void startOnePageScan(ScanTaskDto task);
+    void scanAllPages(SitesList sitesList);
+    void scanOnePage(ScanTaskDto task);
 
 }

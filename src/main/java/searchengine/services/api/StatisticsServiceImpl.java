@@ -1,7 +1,6 @@
 package searchengine.services.api;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import searchengine.data.dto.api.DetailedStatisticsItem;
 import searchengine.data.dto.api.StatisticsData;
 import searchengine.data.dto.api.StatisticsResponse;

@@ -8,7 +8,7 @@ import java.util.Set;
 
 public interface LemmaService {
 
-    void deleteAllLemmasForSite(int siteId);
+    void deleteAllLemmasBySiteId(int siteId);
     List<LemmaDto> getAllByNames(Set<String> names, int siteId);
     void saveLemmas(Map<String, Integer> lemmas, int siteId);
 

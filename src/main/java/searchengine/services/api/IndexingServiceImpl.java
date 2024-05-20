@@ -32,9 +32,9 @@ public class IndexingServiceImpl implements IndexingService {
 
         executorServiceHandler.reload();
         if (taskForScan == null) {
-            scannerService.startAllSitesScan(sites);
+            scannerService.scanAllPages(sites);
         } else {
-            scannerService.startOnePageScan(taskForScan);
+            scannerService.scanOnePage(taskForScan);
         }
         return new DefaultResponse(true, null);
     }

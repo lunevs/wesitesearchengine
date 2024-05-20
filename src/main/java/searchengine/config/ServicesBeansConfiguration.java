@@ -7,7 +7,9 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import searchengine.data.repository.JdbcLemmaRepository;
 import searchengine.data.repository.JdbcRepository;
 import searchengine.data.repository.JdbcSearchIndexRepository;
+import searchengine.data.repository.JdbcSearchResultsRepository;
 import searchengine.data.repository.PageRepository;
+import searchengine.data.repository.SiteRepository;
 import searchengine.services.api.IndexingService;
 import searchengine.services.api.IndexingServiceImpl;
 import searchengine.services.api.SearchStarterService;
@@ -28,7 +30,17 @@ import searchengine.services.scanner.SearchIndexServiceImpl;
 import searchengine.services.scanner.SiteScannerService;
 import searchengine.services.scanner.SiteScannerServiceImpl;
 import searchengine.services.scanner.SiteService;
+import searchengine.services.scanner.SiteServiceImpl;
+import searchengine.services.search.LemmasHolder;
+import searchengine.services.search.LemmasHolderImpl;
+import searchengine.services.search.SearchQueryHolder;
+import searchengine.services.search.SearchQueryHolderImpl;
+import searchengine.services.search.SearchResultsService;
+import searchengine.services.search.SearchResultsServiceImpl;
 import searchengine.services.search.SearchService;
+import searchengine.services.search.SearchServiceImpl;
+import searchengine.services.search.SnippetService;
+import searchengine.services.search.SnippetServiceImpl;
 
 @Configuration
 public class ServicesBeansConfiguration {
@@ -76,5 +88,35 @@ public class ServicesBeansConfiguration {
     @Bean
     public StatisticsService statisticsService(SiteService siteService, JdbcRepository jdbcRepository) {
         return new StatisticsServiceImpl(siteService, jdbcRepository);
+    }
+
+    @Bean
+    public SiteService siteService(PageService pageService, SearchIndexService searchIndexService, SiteRepository siteRepository, LemmaService lemmaService) {
+        return new SiteServiceImpl(pageService, searchIndexService, siteRepository, lemmaService);
+    }
+
+    @Bean
+    public LemmasHolder lemmasHolder(JdbcLemmaRepository lemmaRepository, SearchQueryHolder searchQueryHolder) {
+        return new LemmasHolderImpl(lemmaRepository, searchQueryHolder);
+    }
+
+    @Bean
+    public SearchService searchService(SearchQueryHolder searchQueryHolder, LemmasHolder lemmasHolder, SearchResultsService searchResultsService) {
+        return new SearchServiceImpl(searchQueryHolder, lemmasHolder, searchResultsService);
+    }
+
+    @Bean
+    public SearchResultsService searchResultsService(LemmasHolder lemmasHolder, PageService pageService, SnippetService snippetService, JdbcSearchResultsRepository searchResultsRepository) {
+        return new SearchResultsServiceImpl(lemmasHolder, pageService, snippetService, searchResultsRepository);
+    }
+
+    @Bean
+    public SearchQueryHolder searchQueryHolder(LemmaParser lemmaParser, SiteService siteService) {
+        return new SearchQueryHolderImpl(lemmaParser, siteService);
+    }
+
+    @Bean
+    public SnippetService snippetService(LemmaParser lemmaParser, SearchQueryHolder searchQueryHolder) {
+        return new SnippetServiceImpl(lemmaParser, searchQueryHolder);
     }
 }

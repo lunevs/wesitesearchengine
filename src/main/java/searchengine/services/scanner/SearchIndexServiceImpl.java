@@ -29,7 +29,7 @@ public class SearchIndexServiceImpl implements SearchIndexService {
     }
 
     @Override
-    public void deleteAllBySite(int siteId) {
+    public void deleteAllBySiteId(int siteId) {
         searchIndexRepository.deleteAllForSite(siteId);
         log.info("{} удалены все индексы для сайта {}", Thread.currentThread().getName(), siteId);
     }

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import searchengine.config.SitesList;
 import searchengine.data.dto.scanner.ScanTaskDto;
+import searchengine.data.model.Site;
 import searchengine.data.model.SiteParameters;
 import searchengine.data.model.SiteStatus;
 import searchengine.services.common.ExecutorServiceHandler;
@@ -29,33 +30,33 @@ public class SiteScannerServiceImpl implements SiteScannerService {
 
     @Override
     @Async
-    public void startAllSitesScan(SitesList sitesList) {
+    public void scanAllPages(SitesList sitesList) {
         log.info("{} пользователь запустил сканирование {} сайтов", Thread.currentThread().getName(), sitesList.getSites().size());
         executorServiceHandler.cleanQueue();
-        sitesList.getSites().forEach(this::startOneSiteScan);
+        sitesList.getSites().forEach(this::scanItem);
     }
 
     @Override
     @Async
-    public void startOnePageScan(ScanTaskDto task) {
+    public void scanOnePage(ScanTaskDto task) {
         log.info("{} пользователь запустил сканирование страницы: {}", Thread.currentThread().getName(), task.getFullUrl());
         executorServiceHandler.get().submit(() -> pageParser.call(task));
         executorServiceHandler.cleanQueue();
     }
 
-    private void startOneSiteScan(SiteParameters parameter) {
+    private void scanItem(SiteParameters parameter) {
+        Site site = siteService
+                .findSiteByUrl(parameter.getUrl())
+                .orElseGet(() -> siteService.create(parameter.getUrl(), parameter.getName()));
         if (executorServiceHandler.isNotStopped()) {
-            int siteId = siteService.prepareSiteToStartScanning(parameter);
-            currentScanningSiteId = new AtomicInteger(siteId);
-            executeScanTask(new ScanTaskDto(parameter.getUrl(), "/", siteId));
-            siteService.endSiteScanning(siteId, executorServiceHandler.isNotStopped());
-            log.info("{} завершено сканирование узла: {}", Thread.currentThread().getName(), parameter.getUrl());
+            siteService.deleteAllSiteDependencies(site.getId());
+            currentScanningSiteId = new AtomicInteger(site.getId());
+            executeScanTask(new ScanTaskDto(parameter.getUrl(), "/", site.getId()));
+            log.info("{} завершено сканирование сайта: {}", Thread.currentThread().getName(), parameter.getUrl());
         } else {
             log.warn("{} сканирование сайта {} отменено пользователем", Thread.currentThread().getName(), parameter.getUrl());
-            siteService
-                    .findSiteByUrl(parameter.getUrl())
-                    .ifPresent(site -> siteService.endSiteScanning(site.getId(), false));
         }
+        updateSiteStatusAfterScanning(site.getId(), executorServiceHandler.isNotStopped());
     }
 
     private void executeScanTask(ScanTaskDto scanTaskDto) {
@@ -67,6 +68,13 @@ public class SiteScannerServiceImpl implements SiteScannerService {
                 executorServiceHandler.get().submit(() -> pageParser.call(taskDto));
             }
         }
+    }
+
+    private void updateSiteStatusAfterScanning(int siteId, boolean isNotStopped) {
+        siteService.updateSiteStatus(
+                siteId,
+                isNotStopped ? SiteStatus.INDEXED : SiteStatus.FAILED,
+                isNotStopped ? "" : "сканирование прервано пользователем");
     }
 
 }

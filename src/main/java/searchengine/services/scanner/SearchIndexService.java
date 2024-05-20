@@ -8,6 +8,6 @@ import java.util.Map;
 public interface SearchIndexService {
 
     void saveAll(List<LemmaDto> savedLemmas, int pageId, Map<String, Integer> lemmas);
-    void deleteAllBySite(int siteId);
+    void deleteAllBySiteId(int siteId);
 
 }

@@ -17,7 +17,7 @@ public class LemmaServiceImpl implements LemmaService {
 
 
     @Override
-    public void deleteAllLemmasForSite(int siteId) {
+    public void deleteAllLemmasBySiteId(int siteId) {
         lemmaRepository.deleteAllBySiteId(siteId);
         log.info("{} удалениевсех лемм для сайта: {}", Thread.currentThread().getName(), siteId);
     }
