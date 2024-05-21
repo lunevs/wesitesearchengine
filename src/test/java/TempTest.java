@@ -5,7 +5,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import searchengine.config.AppConfiguration;
 
 import java.util.List;
-import java.util.Set;
 
 @SpringBootTest(classes = AppConfiguration.class)
 public class TempTest {
