@@ -1,8 +1,7 @@
 package searchengine.services.scanner;
 
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import searchengine.data.dto.common.PageDto;
 import searchengine.data.repository.JdbcRepository;
@@ -14,9 +13,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
+@Slf4j
 public class PageServiceImpl implements PageService {
 
-    private static final Logger log = LoggerFactory.getLogger(PageServiceImpl.class);
     private final PageRepository pageRepository;
     private final JdbcRepository jdbcRepository;
     private final SimpleJdbcInsert pageSimpleJdbcInsert;

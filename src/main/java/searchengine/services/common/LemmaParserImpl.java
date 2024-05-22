@@ -18,7 +18,7 @@ public class LemmaParserImpl implements LemmaParser {
     private final SearchIndexService searchIndexService;
     private final LemmaService lemmaService;
 
-    private static final String[] particlesNames = new String[]{"МЕЖД", "ПРЕДЛ", "СОЮЗ"};
+    private static final String[] PARTICLES_NAMES = new String[]{"МЕЖД", "ПРЕДЛ", "СОЮЗ"};
 
     private static final int MIN_WORD_LENGTH = 3;
 
@@ -82,7 +82,7 @@ public class LemmaParserImpl implements LemmaParser {
     }
 
     private boolean hasParticleProperty(String wordBase) {
-        for (String property : particlesNames) {
+        for (String property : PARTICLES_NAMES) {
             if (wordBase.toUpperCase().contains(property)) {
                 return true;
             }

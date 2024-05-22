@@ -1,0 +1,97 @@
+{
+	"info": {
+		"_postman_id": "4af88f0a-5461-4060-b6e7-ad0c18f0d8a6",
+		"name": "job search",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "20209598"
+	},
+	"item": [
+		{
+			"name": "Java",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{search_url}}/positions.json?description=Java&location={{location}}",
+					"host": [
+						"{{search_url}}"
+					],
+					"path": [
+						"positions.json"
+					],
+					"query": [
+						{
+							"key": "description",
+							"value": "Java"
+						},
+						{
+							"key": "location",
+							"value": "{{location}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Python",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{search_url}}/positions.json?description=Python&location={{location}}",
+					"host": [
+						"{{search_url}}"
+					],
+					"path": [
+						"positions.json"
+					],
+					"query": [
+						{
+							"key": "description",
+							"value": "Python"
+						},
+						{
+							"key": "location",
+							"value": "{{location}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Ruby",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{search_url}}/positions.json?description=Python&location={{location}}",
+					"host": [
+						"{{search_url}}"
+					],
+					"path": [
+						"positions.json"
+					],
+					"query": [
+						{
+							"key": "description",
+							"value": "Python"
+						},
+						{
+							"key": "location",
+							"value": "{{location}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "search_url",
+			"value": "https://raw.githubusercontent.com/skillbox-java/JavaEE/main"
+		}
+	]
+}
