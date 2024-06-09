@@ -27,7 +27,7 @@ public class IndexingServiceImpl implements IndexingService {
     @Override
     public DefaultResponse startIndexing() {
         if (executorServiceHandler.isActive()) {
-            return new DefaultResponse(false, "Индексация уже запущена");
+            return new DefaultResponse(true, "Индексация уже запущена");
         }
 
         executorServiceHandler.reload();
